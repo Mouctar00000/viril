@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { ShoppingBag, Menu, X, ArrowRight, Heart } from 'lucide-react';
+import { ShoppingBag, Menu, X, ArrowRight, Heart, Phone } from 'lucide-react';
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -99,44 +99,56 @@ export default function Header() {
             </nav>
           )}
 
-          {/* Right: Functional Wishlist & Cart Button */}
+          {/* Right: Actions (Phone Call on Landing / Cart & Wishlist on Boutique Unlocked) */}
           <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
-            <a
-              href="#boutique"
-              className="relative hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full border border-white/15 bg-black/40 backdrop-blur-xl text-white hover:border-red-400/60 hover:text-red-400 transition-all duration-300"
-              title="Créations favorites"
-            >
-              <Heart className={`w-3.5 h-3.5 ${favorites?.length > 0 ? 'fill-red-500 text-red-500' : 'text-white/70'}`} />
-              <span className="text-xs font-mono font-medium">{favorites?.length || 0}</span>
-            </a>
+            {navStage === 'unlocked' ? (
+              <>
+                <a
+                  href="#boutique"
+                  className="relative hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full border border-white/15 bg-black/40 backdrop-blur-xl text-white hover:border-red-400/60 hover:text-red-400 transition-all duration-300"
+                  title="Créations favorites"
+                >
+                  <Heart className={`w-3.5 h-3.5 ${favorites?.length > 0 ? 'fill-red-500 text-red-500' : 'text-white/70'}`} />
+                  <span className="text-xs font-mono font-medium">{favorites?.length || 0}</span>
+                </a>
 
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative flex items-center gap-2 px-3.5 py-2 rounded-full border border-white/15 bg-black/40 backdrop-blur-xl text-white hover:border-[#D1B992] hover:text-[#D1B992] hover:bg-[#D1B992]/10 transition-all duration-300 group cursor-pointer"
-              aria-label="Ouvrir le panier"
-            >
-              <ShoppingBag className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 duration-300" />
-              <span className="hidden sm:inline text-xs font-mono font-medium tracking-wider">
-                Panier
-              </span>
-              <span
-                className={`min-w-[18px] h-[18px] px-1 grid place-items-center font-sans text-[10px] font-bold bg-[#D1B992] text-[#04050A] rounded-full transition-transform duration-300 ${
-                  totalCount > 0 ? 'scale-100' : 'scale-0'
-                } ${bump ? 'animate-bounce' : ''}`}
-              >
-                {totalCount}
-              </span>
-            </button>
+                <button
+                  onClick={() => setIsCartOpen(true)}
+                  className="relative flex items-center gap-2 px-3.5 py-2 rounded-full border border-white/15 bg-black/40 backdrop-blur-xl text-white hover:border-[#D1B992] hover:text-[#D1B992] hover:bg-[#D1B992]/10 transition-all duration-300 group cursor-pointer"
+                  aria-label="Ouvrir le panier"
+                >
+                  <ShoppingBag className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 duration-300" />
+                  <span className="hidden sm:inline text-xs font-mono font-medium tracking-wider">
+                    Panier
+                  </span>
+                  <span
+                    className={`min-w-[18px] h-[18px] px-1 grid place-items-center font-sans text-[10px] font-bold bg-[#D1B992] text-[#04050A] rounded-full transition-transform duration-300 ${
+                      totalCount > 0 ? 'scale-100' : 'scale-0'
+                    } ${bump ? 'animate-bounce' : ''}`}
+                  >
+                    {totalCount}
+                  </span>
+                </button>
 
-            {/* Mobile Hamburger toggle for small screens (only when unlocked navigation is active) */}
-            {navStage === 'unlocked' && (
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="md:hidden p-2 text-white/80 hover:text-white transition-colors"
-                aria-label="Menu"
+                {/* Mobile Hamburger toggle for small screens */}
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="md:hidden p-2 text-white/80 hover:text-white transition-colors"
+                  aria-label="Menu"
+                >
+                  {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
+              </>
+            ) : (
+              /* Landing stage: Direct Call Phone Button */
+              <a
+                href="tel:+237651024975"
+                aria-label="Appeler VIRIL"
+                title="Appeler VIRIL : +237 651 02 49 75"
+                className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D1B992]/40 bg-black/50 backdrop-blur-xl text-[#D1B992] hover:border-[#D1B992] hover:bg-[#D1B992]/15 hover:scale-105 active:scale-95 transition-all duration-300 group shadow-[0_0_15px_rgba(209,185,146,0.15)]"
               >
-                {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
+                <Phone className="w-4 h-4 text-[#D1B992] transition-transform duration-300 group-hover:rotate-12" />
+              </a>
             )}
           </div>
         </div>

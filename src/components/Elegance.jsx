@@ -297,10 +297,10 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
   }, [selectedCategory, searchQuery, showOnlyInStock, mode]);
 
   const renderShowcase = () => (
-    <div className="relative rounded-[2.5rem] border border-white/10 bg-[#000000] p-6 sm:p-12 md:p-16 overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
+    <div className="relative rounded-[2.5rem] border border-white/10 bg-[#000000] p-6 sm:p-12 md:p-16 overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.8)] min-h-[960px] sm:min-h-[920px] lg:min-h-[660px]">
 
           {/* Section Header */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10 sm:mb-12 relative z-10">
             <div>
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 mb-3">
                 <Sparkles className="w-3.5 h-3.5 text-[#D1B992]" />
@@ -315,208 +315,207 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
                 </span>
               </h2>
             </div>
-
-            {/* Slider Navigation Arrows */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handlePrevShowcase}
-                aria-label="Pièce précédente"
-                className="w-11 h-11 rounded-full border border-white/15 bg-white/[0.03] text-white hover:border-[#D1B992] hover:text-[#D1B992] hover:bg-[#D1B992]/10 transition-all flex items-center justify-center cursor-pointer shadow-md"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleNextShowcase}
-                aria-label="Pièce suivante"
-                className="w-11 h-11 rounded-full border border-white/15 bg-white/[0.03] text-white hover:border-[#D1B992] hover:text-[#D1B992] hover:bg-[#D1B992]/10 transition-all flex items-center justify-center cursor-pointer shadow-md"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
           </div>
 
-          {/* Showcase Stage (Matching Screenshot 3 Layout: Angled Organic Paint Shapes + Floating Product) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center relative z-10">
+          {/* Showcase Stage (Matching Screenshot 3: Pure Black Seamless Stage + Floating Product Visual + Flanking Navigation) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center relative z-10">
             
-            {/* Left: Floating Product Visual Stage with Layered Paint Strokes */}
-            <div className="lg:col-span-7 relative flex items-center justify-center py-6 sm:py-10">
+            {/* Left: Floating Product Visual Stage with Flanking Left & Right Navigation Arrows */}
+            <div className="lg:col-span-7 relative flex items-center justify-center py-4 sm:py-8">
               
-              {/* Product Visual Container (Pure Black #000000 Seamless Integration) */}
-              <div className="relative w-full max-w-[460px] aspect-square flex items-center justify-center">
-                {/* Floating Product Visual: Automatic Sequential 3D Rotating Video Animation */}
-                <div
-                  className="relative z-10 w-[85%] sm:w-[90%] aspect-square rounded-[2rem] overflow-hidden group cursor-pointer animate-in fade-in zoom-in-95 duration-500 transform hover:-translate-y-2 transition-transform bg-[#000000]"
-                  onClick={() => handleOpenConfigurator(activeShowcase)}
+              {/* Product Visual Wrapper with Flanking Arrows */}
+              <div className="relative w-full max-w-[500px] flex items-center justify-center px-4 sm:px-6">
+                
+                {/* Left Navigation Arrow (Repositioned to the left of the visual, vertically centered) */}
+                <button
+                  onClick={handlePrevShowcase}
+                  aria-label="Pièce précédente"
+                  className="absolute left-0 sm:-left-3 md:-left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-black/80 backdrop-blur-md text-white hover:border-[#D1B992] hover:text-[#D1B992] hover:bg-[#D1B992]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.9)]"
                 >
-                  {/* Video 1: SAC (SAC.mp4) - Plays complete rotation first */}
-                  <video
-                    ref={saccVideoRef}
-                    src="/videos/SAC.mp4"
-                    autoPlay
-                    muted
-                    playsInline
-                    preload="auto"
-                    aria-label="Animation Sac VIRIL"
-                    onEnded={handleSaccEnded}
-                    onTimeUpdate={handleSaccTimeUpdate}
-                    className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300 ease-in-out ${
-                      currentShowcaseIdx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                    }`}
-                  />
+                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
 
-                  {/* Video 2: CHAUSSURE (chaussure.mp4) - Plays complete rotation second */}
-                  <video
-                    ref={chaussureVideoRef}
-                    src="/videos/chaussure.mp4"
-                    muted
-                    playsInline
-                    preload="auto"
-                    aria-label="Animation Chaussure VIRIL"
-                    onEnded={handleChaussureEnded}
-                    onTimeUpdate={handleChaussureTimeUpdate}
-                    className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300 ease-in-out ${
-                      currentShowcaseIdx === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                    }`}
-                  />
+                {/* Right Navigation Arrow (Repositioned to the right of the visual, vertically centered) */}
+                <button
+                  onClick={handleNextShowcase}
+                  aria-label="Pièce suivante"
+                  className="absolute right-0 sm:-right-3 md:-right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-black/80 backdrop-blur-md text-white hover:border-[#D1B992] hover:text-[#D1B992] hover:bg-[#D1B992]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer shadow-[0_4px_25px_rgba(0,0,0,0.9)]"
+                >
+                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
 
-                  {/* Video 3: MONTRE (montre.mp4) - Plays complete rotation third */}
-                  <video
-                    ref={montreVideoRef}
-                    src="/videos/montre.mp4"
-                    muted
-                    playsInline
-                    preload="auto"
-                    aria-label="Animation Montre VIRIL"
-                    onEnded={handleMontreEnded}
-                    onTimeUpdate={handleMontreTimeUpdate}
-                    className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300 ease-in-out ${
-                      currentShowcaseIdx === 2 ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                    }`}
-                  />
-
-                  {/* Video 4: PORTE-MONNAIE (porte-monnaie.mp4) - Plays complete rotation fourth */}
-                  <video
-                    ref={porteMonnaieVideoRef}
-                    src="/videos/porte-monnaie.mp4"
-                    muted
-                    playsInline
-                    preload="auto"
-                    aria-label="Animation Porte-Monnaie VIRIL"
-                    onEnded={handlePorteMonnaieEnded}
-                    onTimeUpdate={handlePorteMonnaieTimeUpdate}
-                    className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300 ease-in-out ${
-                      currentShowcaseIdx === 3 ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                    }`}
-                  />
-                </div>
-
-                {/* Tag Badge floating over the 3D rotating visual (Vivid Green for EXCLUSIF) */}
-                {activeShowcase.badge && (
+                {/* Product Visual Container (Pure Black #000000 Seamless Integration) */}
+                <div className="relative w-full aspect-square max-w-[430px] flex items-center justify-center">
+                  {/* Floating Product Visual: Automatic Sequential 3D Rotating Video Animation */}
                   <div
-                    className={`absolute top-4 right-4 z-20 text-[10px] tracking-widest uppercase font-mono shadow-[0_6px_25px_rgba(0,0,0,0.7)] flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${
-                      activeShowcase.badge.toLowerCase().includes('exclusi')
-                        ? 'bg-[#10B981] text-white font-bold border border-emerald-300/40 shadow-[0_0_20px_rgba(16,185,129,0.45)]'
-                        : 'glass-badge-pill'
-                    }`}
+                    className="relative z-10 w-[88%] sm:w-[92%] aspect-square rounded-[2rem] overflow-hidden group cursor-pointer animate-in fade-in zoom-in-95 duration-500 transform hover:-translate-y-1.5 transition-transform bg-[#000000] shadow-[0_15px_45px_rgba(0,0,0,0.9)]"
+                    onClick={() => handleOpenConfigurator(activeShowcase)}
                   >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        activeShowcase.badge.toLowerCase().includes('exclusi')
-                          ? 'bg-white shadow-[0_0_8px_#ffffff] animate-pulse'
-                          : 'bg-[#D1B992] shadow-[0_0_8px_#D1B992] animate-pulse'
+                    {/* Video 1: SAC (SAC.mp4) - Plays complete rotation first */}
+                    <video
+                      ref={saccVideoRef}
+                      src="/videos/SAC.mp4"
+                      autoPlay
+                      muted
+                      playsInline
+                      preload="auto"
+                      aria-label="Animation Sac VIRIL"
+                      onEnded={handleSaccEnded}
+                      onTimeUpdate={handleSaccTimeUpdate}
+                      style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
+                      className={`absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform pointer-events-none transition-opacity duration-300 ease-in-out ${
+                        currentShowcaseIdx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'
                       }`}
                     />
-                    <span>
-                      {activeShowcase.badge.toLowerCase().includes('exclusi') ? 'EXCLUSIF' : activeShowcase.badge}
-                    </span>
+
+                    {/* Video 2: CHAUSSURE (chaussure.mp4) - Plays complete rotation second */}
+                    <video
+                      ref={chaussureVideoRef}
+                      src="/videos/chaussure.mp4"
+                      muted
+                      playsInline
+                      preload="auto"
+                      aria-label="Animation Chaussure VIRIL"
+                      onEnded={handleChaussureEnded}
+                      onTimeUpdate={handleChaussureTimeUpdate}
+                      style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
+                      className={`absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform pointer-events-none transition-opacity duration-300 ease-in-out ${
+                        currentShowcaseIdx === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                      }`}
+                    />
+
+                    {/* Video 3: MONTRE (montre.mp4) - Plays complete rotation third */}
+                    <video
+                      ref={montreVideoRef}
+                      src="/videos/montre.mp4"
+                      muted
+                      playsInline
+                      preload="auto"
+                      aria-label="Animation Montre VIRIL"
+                      onEnded={handleMontreEnded}
+                      onTimeUpdate={handleMontreTimeUpdate}
+                      style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
+                      className={`absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform pointer-events-none transition-opacity duration-300 ease-in-out ${
+                        currentShowcaseIdx === 2 ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                      }`}
+                    />
+
+                    {/* Video 4: PORTE-MONNAIE (porte-monnaie.mp4) - Plays complete rotation fourth */}
+                    <video
+                      ref={porteMonnaieVideoRef}
+                      src="/videos/porte-monnaie.mp4"
+                      muted
+                      playsInline
+                      preload="auto"
+                      aria-label="Animation Porte-Monnaie VIRIL"
+                      onEnded={handlePorteMonnaieEnded}
+                      onTimeUpdate={handlePorteMonnaieTimeUpdate}
+                      style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
+                      className={`absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform pointer-events-none transition-opacity duration-300 ease-in-out ${
+                        currentShowcaseIdx === 3 ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                      }`}
+                    />
+
+                    {/* Restored Original Luxury Frosted Gold Glass Capsule Badge */}
+                    {activeShowcase.badge && (
+                      <div
+                        className="absolute top-4 right-4 z-20 text-[10px] tracking-widest uppercase font-mono shadow-[0_6px_25px_rgba(0,0,0,0.7)] flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-badge-pill transition-all duration-300 pointer-events-none"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#D1B992] shadow-[0_0_8px_#D1B992] animate-pulse" />
+                        <span>{activeShowcase.badge}</span>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+
               </div>
 
             </div>
 
             {/* Right: Narrative Description & Customization Callout */}
-            <div className="lg:col-span-5 space-y-6">
-              
-              <div>
-                <span className="font-mono text-xs text-[#D1B992] tracking-widest uppercase block mb-1">
-                  {activeShowcase.categoryLabel}
-                </span>
-                <h3 className="font-sans font-medium text-3xl sm:text-4xl text-white tracking-tight leading-snug">
-                  {activeShowcase.name}
-                </h3>
-                <p className="font-sans text-xs uppercase tracking-wider text-[#9AA0B4] mt-1">
-                  {activeShowcase.sub}
-                </p>
-              </div>
-
-              {/* Star Rating & Review count */}
-              <div className="flex items-center gap-3">
-                <div className="flex items-center text-[#D4AF37]">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-                <span className="font-mono text-xs text-white font-semibold">
-                  {activeShowcase.rating.toFixed(1)} / 5.0
-                </span>
-                <span className="text-xs text-[#5E6479]">
-                  ({activeShowcase.reviewsCount} avis vérifiés)
-                </span>
-              </div>
-
-              {/* Highlight Quote */}
-              <blockquote className="font-serif italic text-base sm:text-lg text-[#FAF8F5] leading-relaxed border-l-2 border-[#D1B992] pl-4 py-1">
-                « {activeShowcase.featureQuote} »
-              </blockquote>
-
-              <p className="font-sans text-sm text-[#9AA0B4] leading-relaxed">
-                {activeShowcase.description}
-              </p>
-
-              {/* Specifications Badges */}
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="p-3 rounded-xl border border-white/10 bg-[#04050A]">
-                  <span className="text-[10px] uppercase tracking-wider text-[#5E6479] block mb-0.5">Matière première</span>
-                  <strong className="text-white font-medium">{activeShowcase.tag}</strong>
-                </div>
-                <div className="p-3 rounded-xl border border-white/10 bg-[#04050A]">
-                  <span className="text-[10px] uppercase tracking-wider text-[#5E6479] block mb-0.5">Sur-mesure</span>
-                  <strong className="text-[#D1B992] font-medium">Gravure Laser Dispo</strong>
-                </div>
-              </div>
-
-              {/* Pricing & CTA */}
-              <div className="pt-2 flex flex-wrap items-center justify-between gap-4">
+            <div className="lg:col-span-5 min-h-[490px] sm:min-h-[470px] lg:min-h-[510px] flex flex-col justify-between">
+              <div key={activeShowcase.id} className="animate-showcase-fade flex flex-col justify-between h-full space-y-5 sm:space-y-6">
+                
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#5E6479] block">Prix création</span>
-                  <div className="flex items-baseline gap-2.5">
-                    <span className="font-sans font-bold text-2xl sm:text-3xl text-white">
-                      {formatMoney(activeShowcase.price)}
-                    </span>
-                    {activeShowcase.originalPrice && (
-                      <span className="font-mono text-sm text-[#5E6479] line-through">
-                        {formatMoney(activeShowcase.originalPrice)}
-                      </span>
-                    )}
+                  <span className="font-mono text-xs text-[#D1B992] tracking-widest uppercase block mb-1">
+                    {activeShowcase.categoryLabel}
+                  </span>
+                  <h3 className="font-sans font-medium text-2xl sm:text-3xl md:text-4xl text-white tracking-tight leading-snug min-h-[3.2rem] sm:min-h-[4rem] flex items-center">
+                    {activeShowcase.name}
+                  </h3>
+                  <p className="font-sans text-xs uppercase tracking-wider text-[#9AA0B4] mt-1">
+                    {activeShowcase.sub}
+                  </p>
+                </div>
+
+                {/* Star Rating & Review count */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center text-[#D4AF37]">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-current" />
+                    ))}
+                  </div>
+                  <span className="font-mono text-xs text-white font-semibold">
+                    {activeShowcase.rating.toFixed(1)} / 5.0
+                  </span>
+                  <span className="text-xs text-[#5E6479]">
+                    ({activeShowcase.reviewsCount} avis vérifiés)
+                  </span>
+                </div>
+
+                {/* Highlight Quote */}
+                <blockquote className="font-serif italic text-base sm:text-lg text-[#FAF8F5] leading-relaxed border-l-2 border-[#D1B992] pl-4 py-1 min-h-[3.8rem] flex items-center">
+                  « {activeShowcase.featureQuote} »
+                </blockquote>
+
+                <p className="font-sans text-sm text-[#9AA0B4] leading-relaxed min-h-[4.4rem]">
+                  {activeShowcase.description}
+                </p>
+
+                {/* Specifications Badges */}
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="p-3 rounded-xl border border-white/10 bg-[#04050A]">
+                    <span className="text-[10px] uppercase tracking-wider text-[#5E6479] block mb-0.5">Matière première</span>
+                    <strong className="text-white font-medium truncate block">{activeShowcase.tag}</strong>
+                  </div>
+                  <div className="p-3 rounded-xl border border-white/10 bg-[#04050A]">
+                    <span className="text-[10px] uppercase tracking-wider text-[#5E6479] block mb-0.5">Sur-mesure</span>
+                    <strong className="text-[#D1B992] font-medium block">Gravure Laser Dispo</strong>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={() => handleOpenConfigurator(activeShowcase)}
-                    className="btn-main btn--line cursor-pointer inline-flex items-center gap-2"
-                  >
-                    <span>Personnaliser ce modèle</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => unlockNav('boutique')}
-                    className="btn-main btn--solid btn-light-sweep cursor-pointer inline-flex items-center gap-2 shadow-[0_0_20px_rgba(209,185,146,0.4)]"
-                  >
-                    <span>Découvrir la collection</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-black" />
-                  </button>
+                {/* Pricing & CTA */}
+                <div className="pt-2 space-y-4">
+                  <div className="text-center sm:text-left">
+                    <span className="text-[10.5px] uppercase tracking-wider text-[#5E6479] block mb-0.5">Prix création</span>
+                    <div className="flex items-baseline justify-center sm:justify-start gap-2.5">
+                      <span className="font-sans font-bold text-2xl sm:text-3xl text-white">
+                        {formatMoney(activeShowcase.price)}
+                      </span>
+                      {activeShowcase.originalPrice && (
+                        <span className="font-mono text-sm text-[#5E6479] line-through">
+                          {formatMoney(activeShowcase.originalPrice)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="w-full flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2.5 sm:gap-3">
+                    <button
+                      onClick={() => handleOpenConfigurator(activeShowcase)}
+                      className="btn-main btn--line cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto py-2.5 sm:py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] tracking-wider"
+                    >
+                      <span>Personnaliser ce modèle</span>
+                      <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
+                    </button>
+                    <button
+                      onClick={() => unlockNav('boutique')}
+                      className="btn-main btn--solid btn-light-sweep cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto py-2.5 sm:py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] tracking-wider shadow-[0_0_20px_rgba(209,185,146,0.4)]"
+                    >
+                      <span>Découvrir la collection</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-black flex-shrink-0" />
+                    </button>
+                  </div>
                 </div>
               </div>
 

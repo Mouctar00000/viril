@@ -353,3 +353,21 @@
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
 }
 
+/* Smooth Cross-Fade for Product Showcase Text Transitions */
+@keyframes showcaseCrossFade {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-showcase-fade {
+  animation: showcaseCrossFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+
