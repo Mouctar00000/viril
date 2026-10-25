@@ -113,19 +113,19 @@ function drawImageCover(ctx, img, canvasWidth, canvasHeight, isMobile = false) {
     const nw = iw * ratio;
     const nh = ih * ratio;
     const cx = (canvasWidth - nw) * 0.5;
-    const bottomClearance = 48 * dpr;
-    // Soles of walking shoes touch y ≈ 716 in 720p source frame
-    const cy = canvasHeight - (716 * ratio) - bottomClearance;
+    // Start flush with the top of the container (cy = 0) to eliminate any black gap above the video,
+    // while keeping both shoes comfortably visible above the bottom edge
+    const cy = 0;
 
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     ctx.drawImage(img, cx, cy, nw, nh);
   } else {
-    // Desktop / PC restored original balanced appearance: object-contain
+    // Desktop / PC restored original balanced appearance: object-contain flush with top
     const ratio = Math.min(hRatio, vRatio);
     const nw = iw * ratio;
     const nh = ih * ratio;
     const cx = (canvasWidth - nw) * 0.5;
-    const cy = (canvasHeight - nh) * 0.5;
+    const cy = 0;
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     ctx.drawImage(img, cx, cy, nw, nh);
   }
@@ -246,13 +246,11 @@ export default function Hero() {
           const nw = 1280 * ratio;
           const nh = 720 * ratio;
           const cx = (w - nw) * 0.5;
-          const bottomClearance = 48 * dpr;
-          const cy = h - (716 * ratio) - bottomClearance;
 
           cleanImg.style.width = `${nw / dpr}px`;
           cleanImg.style.height = `${nh / dpr}px`;
           cleanImg.style.left = `${cx / dpr}px`;
-          cleanImg.style.top = `${cy / dpr}px`;
+          cleanImg.style.top = '0px';
           cleanImg.style.right = 'auto';
           cleanImg.style.bottom = 'auto';
           cleanImg.style.objectFit = 'contain';
@@ -524,7 +522,7 @@ export default function Hero() {
         className="relative w-full h-[100dvh] overflow-hidden bg-[#04050A]"
       >
         {/* 1. Full-Size Responsive Canvas Animation Container (100% Reliable on Mobile) */}
-        <div className="absolute top-[80px] sm:top-[88px] left-0 right-0 bottom-0 w-full h-[calc(100dvh-80px)] sm:h-[calc(100dvh-88px)] overflow-hidden z-10 pointer-events-none">
+        <div className="absolute top-[62px] sm:top-[70px] left-0 right-0 bottom-0 w-full h-[calc(100dvh-62px)] sm:h-[calc(100dvh-70px)] overflow-hidden z-10 pointer-events-none">
           <canvas
             ref={canvasRef}
             className="w-full h-full object-cover object-center select-none pointer-events-none transition-opacity duration-500"
@@ -548,9 +546,16 @@ export default function Hero() {
         </div>
 
         {/* 2. Dynamic Scroll-Synchronized Animated Text Overlay (Alternating Left & Right) */}
-        <div className="absolute top-[75px] sm:top-[88px] left-0 right-0 bottom-0 z-40 pointer-events-none overflow-hidden">
+        <div className="absolute top-[62px] sm:top-[70px] left-0 right-0 bottom-0 z-40 pointer-events-none overflow-hidden">
           {HERO_DYNAMIC_MESSAGES.map((msg, msgIdx) => {
-            const isLeft = msg.side === 'left';
+            const isWristMsg = msg.id === 'msg-2';
+            const isLeft = isWristMsg || msg.side === 'left';
+            const posClass = isWristMsg
+              ? 'left-3 xs:left-5 sm:left-8 md:left-12 lg:left-16 xl:left-24 top-[64%] sm:top-[56%] text-left max-w-[210px] xs:max-w-[235px] sm:max-w-[300px] md:max-w-[360px]'
+              : isLeft
+              ? 'left-4 xs:left-6 sm:left-10 md:left-14 lg:left-20 xl:left-28 2xl:left-32 top-[62%] sm:top-1/2 text-left max-w-[280px] xs:max-w-[320px] sm:max-w-[380px] md:max-w-[440px] lg:max-w-[480px] xl:max-w-[520px]'
+              : 'right-4 xs:right-6 sm:right-10 md:right-14 lg:right-16 xl:right-24 2xl:right-28 top-[62%] sm:top-1/2 text-left sm:text-right max-w-[280px] xs:max-w-[320px] sm:max-w-[380px] md:max-w-[440px] lg:max-w-[480px] xl:max-w-[520px]';
+
             return (
               <div
                 key={msg.id}
@@ -560,11 +565,7 @@ export default function Hero() {
                   visibility: 'hidden',
                   willChange: 'opacity, transform',
                 }}
-                className={`absolute transition-none select-none ${
-                  isLeft
-                    ? 'left-4 xs:left-6 sm:left-10 md:left-14 lg:left-20 xl:left-28 2xl:left-32 top-[62%] sm:top-1/2 text-left'
-                    : 'right-4 xs:right-6 sm:right-10 md:right-14 lg:right-16 xl:right-24 2xl:right-28 top-[62%] sm:top-1/2 text-left sm:text-right'
-                } w-[calc(100vw-32px)] xs:w-[calc(100vw-48px)] sm:w-auto max-w-[280px] xs:max-w-[320px] sm:max-w-[380px] md:max-w-[440px] lg:max-w-[480px] xl:max-w-[520px]`}
+                className={`absolute transition-none select-none ${posClass} w-[calc(100vw-32px)] xs:w-[calc(100vw-48px)] sm:w-auto`}
               >
                 {/* Multi-line Monumental Headline */}
                 <div className={`flex flex-col space-y-1 sm:space-y-1.5 md:space-y-2 ${isLeft ? 'items-start' : 'items-start sm:items-end'}`}>
@@ -629,7 +630,7 @@ export default function Hero() {
         {/* 3. Centered Branding: Heading moved slightly upward & Button moved slightly downward */}
         <div
           ref={centerBrandingRef}
-          className="absolute top-[80px] sm:top-[88px] left-0 right-0 bottom-0 z-30 flex flex-col items-center justify-center text-center px-4 sm:px-6 pointer-events-none will-change-[opacity,filter]"
+          className="absolute top-[62px] sm:top-[70px] left-0 right-0 bottom-0 z-30 flex flex-col items-center justify-center text-center px-4 sm:px-6 pointer-events-none will-change-[opacity,filter]"
         >
           {/* Main Brand Title: VIRIL ACCESSOIRES */}
           <div className="pointer-events-auto max-w-5xl mx-auto px-4 -translate-y-3 sm:-translate-y-5 md:-translate-y-6">

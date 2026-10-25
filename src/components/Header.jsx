@@ -48,8 +48,8 @@ export default function Header() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? 'h-[72px] sm:h-[78px] bg-[#04050A]/90 backdrop-blur-2xl border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.7)]'
-            : 'h-[80px] sm:h-[88px] bg-[#04050A]/90 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_25px_rgba(0,0,0,0.15)]'
+            ? 'h-[56px] sm:h-[64px] bg-[#04050A]/90 backdrop-blur-2xl border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.7)]'
+            : 'h-[62px] sm:h-[70px] bg-[#04050A]/90 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_25px_rgba(0,0,0,0.15)]'
         } flex items-center`}
       >
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 md:px-14 flex items-center justify-between gap-6">
