@@ -91,8 +91,11 @@ function smootherstep(t) {
 
 /**
  * Draws an image into canvas:
- * - On Mobile (isMobile = true): uses object-cover (Math.max) so the animation fills the vertical mobile viewport cleanly (100% untouched).
- * - On Desktop / PC (isMobile = false): uses object-contain (Math.min) so the character, jacket, and outfit fit naturally and elegantly in the center without excessive scaling, cropping, or overflow.
+ * - On Mobile (isMobile = true): accurately scaled and framed to keep the entire character body,
+ *   including both legs and both shoes, 100% visible throughout all animation phases (standing and walking),
+ *   clearing the canvas and keeping a safe 48px clearance above the bottom edge.
+ * - On Desktop / PC (isMobile = false): uses object-contain (Math.min) so the character, jacket, and outfit
+ *   fit naturally and elegantly in the center without excessive scaling, cropping, or overflow (100% untouched).
  */
 function drawImageCover(ctx, img, canvasWidth, canvasHeight, isMobile = false) {
   if (!img || !img.complete || img.naturalWidth === 0) return;
@@ -102,12 +105,19 @@ function drawImageCover(ctx, img, canvasWidth, canvasHeight, isMobile = false) {
   const vRatio = canvasHeight / ih;
 
   if (isMobile) {
-    // 100% UNCHANGED mobile behavior: object-cover
-    const ratio = Math.max(hRatio, vRatio);
+    const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+    // Mobile responsive scaling: framed to keep full body and both shoes fully visible
+    const maxScaleByWidth = (canvasWidth * 0.78) / (320 * vRatio);
+    const mobileScale = Math.min(0.88, Math.max(0.72, maxScaleByWidth));
+    const ratio = vRatio * mobileScale;
     const nw = iw * ratio;
     const nh = ih * ratio;
     const cx = (canvasWidth - nw) * 0.5;
-    const cy = (canvasHeight - nh) * 0.5;
+    const bottomClearance = 48 * dpr;
+    // Soles of walking shoes touch y ≈ 716 in 720p source frame
+    const cy = canvasHeight - (716 * ratio) - bottomClearance;
+
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     ctx.drawImage(img, cx, cy, nw, nh);
   } else {
     // Desktop / PC restored original balanced appearance: object-contain
@@ -130,7 +140,7 @@ export default function Hero() {
   const centerBrandingRef = useRef(null);
   const messageBlockRefs = useRef([]);
   const messageLineRefs = useRef([]);
-  const isMobileRef = useRef(false);
+  const isMobileRef = useRef(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const framesRef = useRef([]);
   const lastDrawnIndexRef = useRef(-1);
   const needsResizeRedrawRef = useRef(true);
@@ -163,7 +173,7 @@ export default function Hero() {
       if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          drawImageCover(ctx, img0, canvas.width, canvas.height);
+          drawImageCover(ctx, img0, canvas.width, canvas.height, isMobileRef.current);
           lastDrawnIndexRef.current = 0;
         }
       }
@@ -222,7 +232,40 @@ export default function Hero() {
         canvas.height = h;
         needsResizeRedrawRef.current = true;
       }
-      isMobileRef.current = window.innerWidth < 768;
+      const isMobile = window.innerWidth < 768;
+      isMobileRef.current = isMobile;
+
+      // Align opening master frame with canvas on mobile
+      const cleanImg = cleanFrameRef.current;
+      if (cleanImg) {
+        if (isMobile) {
+          const vRatio = h / 720;
+          const maxScaleByWidth = (w * 0.78) / (320 * vRatio);
+          const mobileScale = Math.min(0.88, Math.max(0.72, maxScaleByWidth));
+          const ratio = vRatio * mobileScale;
+          const nw = 1280 * ratio;
+          const nh = 720 * ratio;
+          const cx = (w - nw) * 0.5;
+          const bottomClearance = 48 * dpr;
+          const cy = h - (716 * ratio) - bottomClearance;
+
+          cleanImg.style.width = `${nw / dpr}px`;
+          cleanImg.style.height = `${nh / dpr}px`;
+          cleanImg.style.left = `${cx / dpr}px`;
+          cleanImg.style.top = `${cy / dpr}px`;
+          cleanImg.style.right = 'auto';
+          cleanImg.style.bottom = 'auto';
+          cleanImg.style.objectFit = 'contain';
+        } else {
+          cleanImg.style.width = '';
+          cleanImg.style.height = '';
+          cleanImg.style.left = '';
+          cleanImg.style.top = '';
+          cleanImg.style.right = '';
+          cleanImg.style.bottom = '';
+          cleanImg.style.objectFit = '';
+        }
+      }
     };
 
     updateCanvasSize();
@@ -498,10 +541,10 @@ export default function Hero() {
           />
 
           {/* Seamless bottom gradient fade to transition cleanly into the next section */}
-          <div className="absolute inset-x-0 bottom-0 h-32 sm:h-44 bg-gradient-to-t from-[#04050A] via-[#04050A]/60 to-transparent pointer-events-none z-15" />
+          <div className="absolute inset-x-0 bottom-0 h-10 sm:h-44 bg-gradient-to-t from-[#04050A] via-[#04050A]/40 to-transparent pointer-events-none z-15" />
 
           {/* Subtle perimeter vignette for cinematic depth */}
-          <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(4,5,10,0.65)] pointer-events-none z-15" />
+          <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(4,5,10,0.5)] sm:shadow-[inset_0_0_120px_rgba(4,5,10,0.65)] pointer-events-none z-15" />
         </div>
 
         {/* 2. Dynamic Scroll-Synchronized Animated Text Overlay (Alternating Left & Right) */}
