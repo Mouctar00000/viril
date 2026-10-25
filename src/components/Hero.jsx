@@ -2,18 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const VIDEO_SRC = '/videos/viril-hero.mp4';
-const DEFAULT_DURATION = 10.0;
-
-
+const TOTAL_FRAMES = 240;
+const FRAME_BASE_URL = '/images/hero-frames/frame_';
 
 /**
  * Dynamic text messages synchronized with the animation progress.
- * Easy to edit, add, or remove.
  * - start / end: animation progress range (0.00 to 1.00)
  * - side: 'left' or 'right' (alternating presentation)
  */
@@ -92,72 +89,127 @@ function smootherstep(t) {
   return x * x * x * (x * (x * 6 - 15) + 10);
 }
 
+/**
+ * Draws an image into canvas with object-cover aspect ratio, perfectly centered
+ */
+function drawImageCover(ctx, img, canvasWidth, canvasHeight) {
+  if (!img || !img.complete || img.naturalWidth === 0) return;
+  const iw = img.naturalWidth;
+  const ih = img.naturalHeight;
+  const hRatio = canvasWidth / iw;
+  const vRatio = canvasHeight / ih;
+  const ratio = Math.max(hRatio, vRatio);
+  const nw = iw * ratio;
+  const nh = ih * ratio;
+  const cx = (canvasWidth - nw) * 0.5;
+  const cy = (canvasHeight - nh) * 0.5;
+  ctx.drawImage(img, cx, cy, nw, nh);
+}
+
 export default function Hero() {
   const { unlockNav } = useCart();
   const containerRef = useRef(null);
   const pinTargetRef = useRef(null);
-  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const cleanFrameRef = useRef(null);
   const centerBrandingRef = useRef(null);
   const messageBlockRefs = useRef([]);
   const messageLineRefs = useRef([]);
   const isMobileRef = useRef(false);
+  const framesRef = useRef([]);
+  const lastDrawnIndexRef = useRef(-1);
+  const needsResizeRedrawRef = useRef(true);
 
-  const [videoDuration, setVideoDuration] = useState(DEFAULT_DURATION);
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
-  const targetTimeRef = useRef(0);
   const baseProgressRef = useRef(0);
   const currentProgressRef = useRef(0);
   const mouseOffsetRef = useRef(0);
   const rafIdRef = useRef(null);
 
-  // 1. Initialize Video & Metadata
+  // 1. Preload 240-frame WebP Animation Sequence (Guarantees 0% Black Screen on Mobile)
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    let isCancelled = false;
+    const loadedImages = new Array(TOTAL_FRAMES);
 
-    let isMounted = true;
+    const getFrameSrc = (index) => {
+      const num = String(index + 1).padStart(3, '0');
+      return `${FRAME_BASE_URL}${num}.webp`;
+    };
 
-    const handleLoadedMetadata = () => {
-      if (!isMounted) return;
-      const dur = video.duration && !isNaN(video.duration) && video.duration > 0
-        ? video.duration
-        : DEFAULT_DURATION;
-      setVideoDuration(dur);
-      setIsVideoLoaded(true);
-
-      try {
-        video.currentTime = 0.001;
-      } catch {
-        // Silently handled
+    // Load initial frame immediately to paint canvas
+    const img0 = new Image();
+    img0.src = getFrameSrc(0);
+    img0.onload = () => {
+      if (isCancelled) return;
+      loadedImages[0] = img0;
+      setIsReady(true);
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          drawImageCover(ctx, img0, canvas.width, canvas.height);
+          lastDrawnIndexRef.current = 0;
+        }
       }
     };
 
-    if (video.readyState >= 1) {
-      handleLoadedMetadata();
-    } else {
-      video.addEventListener('loadedmetadata', handleLoadedMetadata);
-    }
+    // Progressive loading:
+    // First load every 4th frame (keyframes) to cover full scroll range immediately, then fill all frames
+    const loadRemaining = () => {
+      if (isCancelled) return;
+
+      // Phase 1: Sparse keyframes
+      for (let i = 0; i < TOTAL_FRAMES; i += 4) {
+        if (loadedImages[i]) continue;
+        const img = new Image();
+        img.src = getFrameSrc(i);
+        img.onload = () => {
+          if (!isCancelled) loadedImages[i] = img;
+        };
+      }
+
+      // Phase 2: All intermediate frames
+      for (let i = 0; i < TOTAL_FRAMES; i++) {
+        if (loadedImages[i]) continue;
+        const img = new Image();
+        img.src = getFrameSrc(i);
+        img.onload = () => {
+          if (!isCancelled) loadedImages[i] = img;
+        };
+      }
+    };
+
+    const timer = setTimeout(loadRemaining, 60);
+    framesRef.current = loadedImages;
 
     return () => {
-      isMounted = false;
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      isCancelled = true;
+      clearTimeout(timer);
     };
   }, []);
 
-  // 2. High-Performance RAF Seek Engine & Live Text Synchronization
+  // 2. High-Performance RAF Canvas Drawing Engine & Live Text Synchronization
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
     let isRunning = true;
 
-    const updateMobileStatus = () => {
+    const updateCanvasSize = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = Math.round(rect.width * dpr);
+      const h = Math.round(rect.height * dpr);
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+        needsResizeRedrawRef.current = true;
+      }
       isMobileRef.current = window.innerWidth < 768;
     };
-    updateMobileStatus();
-    window.addEventListener('resize', updateMobileStatus);
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
 
     const seekLoop = () => {
       if (!isRunning) return;
@@ -167,18 +219,43 @@ export default function Hero() {
       currentProgressRef.current += (targetProg - currentProgressRef.current) * 0.22;
       const effectiveProg = Math.max(0, Math.min(1, currentProgressRef.current));
 
-      const dur = video.duration || videoDuration;
-      // Seek video in perfect lockstep with the smoothed progress
-      const targetTime = Math.max(0, Math.min(dur - 0.01, effectiveProg * dur));
-      const current = video.currentTime;
-      const diff = Math.abs(current - targetTime);
+      // Draw canvas frame corresponding to effective progress
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const targetIndex = Math.min(
+            TOTAL_FRAMES - 1,
+            Math.max(0, Math.floor(effectiveProg * TOTAL_FRAMES))
+          );
 
-      // Seek video smoothly when difference exceeds ~half a frame
-      if (!video.seeking && diff > 0.016) {
-        video.currentTime = targetTime;
+          if (targetIndex !== lastDrawnIndexRef.current || needsResizeRedrawRef.current) {
+            needsResizeRedrawRef.current = false;
+            let img = framesRef.current[targetIndex];
+
+            // If exact frame isn't loaded yet, find nearest available loaded frame
+            if (!img || !img.complete || img.naturalWidth === 0) {
+              for (let d = 1; d < TOTAL_FRAMES; d++) {
+                if (targetIndex - d >= 0 && framesRef.current[targetIndex - d]?.complete) {
+                  img = framesRef.current[targetIndex - d];
+                  break;
+                }
+                if (targetIndex + d < TOTAL_FRAMES && framesRef.current[targetIndex + d]?.complete) {
+                  img = framesRef.current[targetIndex + d];
+                  break;
+                }
+              }
+            }
+
+            if (img && img.complete && img.naturalWidth > 0) {
+              drawImageCover(ctx, img, canvas.width, canvas.height);
+              lastDrawnIndexRef.current = targetIndex;
+            }
+          }
+        }
       }
 
-      // Synchronize animated typography (Line-by-Line Writing reveal, Image 1 inspired)
+      // Synchronize animated typography
       HERO_DYNAMIC_MESSAGES.forEach((msg, msgIdx) => {
         const blockEl = messageBlockRefs.current[msgIdx];
         if (!blockEl) return;
@@ -207,17 +284,16 @@ export default function Hero() {
         blockEl.style.visibility = blockOpacity > 0.005 ? 'visible' : 'hidden';
         blockEl.style.pointerEvents = blockOpacity > 0.4 ? 'auto' : 'none';
 
-        // Centered vertical baseline on desktop, gentle float on mobile
+        // Responsive vertical placement: centered baseline on desktop, lower third on mobile to not cover the jacket
         blockEl.style.transform = isMobileRef.current
-          ? `translateY(${blockY.toFixed(2)}px)`
+          ? `translateY(calc(-30% + ${blockY.toFixed(2)}px))`
           : `translateY(calc(-50% + ${blockY.toFixed(2)}px))`;
 
-        // Animate each line progressively during entrance window (0.00 to 0.32)
+        // Animate each line progressively during entrance window
         const lineEls = messageLineRefs.current[msgIdx] || [];
         lineEls.forEach((lineEl, lineIdx) => {
           if (!lineEl) return;
 
-          // Sequential line reveal stagger: each line writes across 0.085 of block progress
           const stepSize = 0.045;
           const lineDuration = 0.085;
           const lineStart = lineIdx * stepSize;
@@ -257,11 +333,6 @@ export default function Hero() {
       });
 
       // Synchronize Central Branding (VIRIL ACCESSOIRES + CTA Button):
-      // 1. Initial State (0.00 - 0.045): Fully visible (opacity 1, blur 0)
-      // 2. Disappearance (0.045 - 0.075): Smooth quick fade-out & subtle blur before msg-1 starts at 0.08
-      // 3. Subtitle Sequence (0.075 - 0.925): 100% hidden (opacity 0, visibility hidden)
-      // 4. Reappearance (0.925 - 0.975): Elegant, gradual reveal after msg-4 finishes at 0.92
-      // 5. Finale (0.975 - 1.00): Fully visible (opacity 1, blur 0)
       if (centerBrandingRef.current) {
         let centerOpacity = 0;
         let centerBlur = 0;
@@ -293,9 +364,7 @@ export default function Hero() {
         centerBrandingRef.current.style.pointerEvents = centerOpacity > 0.4 ? 'auto' : 'none';
       }
 
-      // Synchronize Clean Opening Frame (Pants & Shoes Removed at the very beginning):
-      // When progress is at 0 (t <= 0.008): 100% visible (only jacket/blazer & upper outfit floating).
-      // Smoothly dissolves into the video between progress 0.008 and 0.045 so original animation plays seamlessly.
+      // Synchronize Clean Opening Frame (Pants & Shoes Removed at start)
       if (cleanFrameRef.current) {
         let cleanOpacity = 0;
         if (effectiveProg <= 0.008) {
@@ -316,26 +385,20 @@ export default function Hero() {
 
     return () => {
       isRunning = false;
-      window.removeEventListener('resize', updateMobileStatus);
+      window.removeEventListener('resize', updateCanvasSize);
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
-  }, [videoDuration]);
+  }, []);
 
   // 3. GSAP ScrollTrigger Full-Screen Pinning & Bidirectional Scrubbing
   useEffect(() => {
     if (!containerRef.current || !pinTargetRef.current) return;
 
-    // Extended cinematic scroll distance to unfold the experience at a calm, relaxed pace
     const isMobile = window.innerWidth < 768;
-    // Desktop: 7200px (~720px/sec of footage), Mobile: 5000px (~500px/sec of footage)
-    const scrollDistance = isMobile ? 5000 : 7200;
-
+    const scrollDistance = isMobile ? 4800 : 7200;
     const progressProxy = { value: 0 };
 
     const ctx = gsap.context(() => {
-      // Use a linear tween on a proxy object attached to ScrollTrigger with scrub.
-      // In GSAP, scrub on a tween applies physical momentum damping to the tween's value,
-      // completely eliminating mouse-wheel notch stepping and abrupt jumps.
       gsap.to(progressProxy, {
         value: 1,
         ease: 'none',
@@ -345,7 +408,7 @@ export default function Hero() {
           end: `+=${scrollDistance}`,
           pin: pinTargetRef.current,
           pinSpacing: true,
-          scrub: 0.45, // Responsive yet weighted momentum (no floating lag)
+          scrub: 0.45,
           onUpdate: () => {
             baseProgressRef.current = progressProxy.value;
           },
@@ -363,14 +426,13 @@ export default function Hero() {
       window.removeEventListener('resize', handleResize);
       ctx.revert();
     };
-  }, [videoDuration]);
+  }, []);
 
   // 4. Subtle Interactive Mouse Tracking
   const handleMouseMove = (e) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     if (rect.width > 0) {
-      // Subtle micro-parallax shift (+/- 0.018) based on mouse position
       const ratio = (e.clientX / rect.width - 0.5) * 0.02;
       mouseOffsetRef.current = ratio;
     }
@@ -393,17 +455,12 @@ export default function Hero() {
         ref={pinTargetRef}
         className="relative w-full h-[100dvh] overflow-hidden bg-[#04050A]"
       >
-        {/* 1. Full-Size Responsive Video Container */}
-        {/* Begins exactly below the header line and spans 100% full width */}
+        {/* 1. Full-Size Responsive Canvas Animation Container (100% Reliable on Mobile) */}
         <div className="absolute top-[80px] sm:top-[88px] left-0 right-0 bottom-0 w-full h-[calc(100dvh-80px)] sm:h-[calc(100dvh-88px)] overflow-hidden z-10 pointer-events-none">
-          <video
-            ref={videoRef}
-            src={VIDEO_SRC}
-            playsInline
-            muted
-            preload="auto"
-            className="w-full h-full object-cover object-center select-none pointer-events-none transition-opacity duration-700"
-            style={{ opacity: isVideoLoaded ? 1 : 0.85 }}
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full object-cover object-center select-none pointer-events-none transition-opacity duration-500"
+            style={{ opacity: isReady ? 1 : 0.85 }}
           />
 
           {/* Master Opening Frame: Jacket/Blazer preserved, Pants & Shoes completely removed */}
@@ -422,8 +479,8 @@ export default function Hero() {
           <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(4,5,10,0.65)] pointer-events-none z-15" />
         </div>
 
-        {/* 2. Dynamic Scroll-Synchronized Animated Text Overlay (Alternating Left & Right, Image 1 Typography) */}
-        <div className="absolute top-[80px] sm:top-[88px] left-0 right-0 bottom-0 z-40 pointer-events-none overflow-hidden">
+        {/* 2. Dynamic Scroll-Synchronized Animated Text Overlay (Alternating Left & Right) */}
+        <div className="absolute top-[75px] sm:top-[88px] left-0 right-0 bottom-0 z-40 pointer-events-none overflow-hidden">
           {HERO_DYNAMIC_MESSAGES.map((msg, msgIdx) => {
             const isLeft = msg.side === 'left';
             return (
@@ -435,14 +492,14 @@ export default function Hero() {
                   visibility: 'hidden',
                   willChange: 'opacity, transform',
                 }}
-                className={`absolute transition-none select-none text-left ${
+                className={`absolute transition-none select-none ${
                   isLeft
-                    ? 'left-6 sm:left-10 md:left-14 lg:left-20 xl:left-28 2xl:left-32 top-[60%] sm:top-1/2'
-                    : 'right-6 sm:right-10 md:right-14 lg:right-16 xl:right-24 2xl:right-28 top-[60%] sm:top-1/2'
-                } w-[calc(100vw-48px)] sm:w-auto max-w-[290px] sm:max-w-[380px] md:max-w-[440px] lg:max-w-[480px] xl:max-w-[520px]`}
+                    ? 'left-4 xs:left-6 sm:left-10 md:left-14 lg:left-20 xl:left-28 2xl:left-32 top-[62%] sm:top-1/2 text-left'
+                    : 'right-4 xs:right-6 sm:right-10 md:right-14 lg:right-16 xl:right-24 2xl:right-28 top-[62%] sm:top-1/2 text-left sm:text-right'
+                } w-[calc(100vw-32px)] xs:w-[calc(100vw-48px)] sm:w-auto max-w-[280px] xs:max-w-[320px] sm:max-w-[380px] md:max-w-[440px] lg:max-w-[480px] xl:max-w-[520px]`}
               >
-                {/* Multi-line Monumental Headline (Image 1 Style: Stacked, Tight Tracking, Pure White) */}
-                <div className="flex flex-col space-y-1 sm:space-y-1.5 md:space-y-2">
+                {/* Multi-line Monumental Headline */}
+                <div className={`flex flex-col space-y-1 sm:space-y-1.5 md:space-y-2 ${isLeft ? 'items-start' : 'items-start sm:items-end'}`}>
                   {msg.titleLines.map((line, lineIdx) => (
                     <div
                       key={lineIdx}
@@ -450,7 +507,7 @@ export default function Hero() {
                         if (!messageLineRefs.current[msgIdx]) messageLineRefs.current[msgIdx] = [];
                         messageLineRefs.current[msgIdx][lineIdx] = el;
                       }}
-                      className="overflow-hidden will-change-[clip-path,opacity,transform]"
+                      className="overflow-hidden will-change-[clip-path,opacity,transform] max-w-full"
                       style={{
                         opacity: 0,
                         visibility: 'hidden',
@@ -458,10 +515,10 @@ export default function Hero() {
                         WebkitClipPath: 'inset(0 100% 0 0)',
                       }}
                     >
-                      <h3 className="font-sans text-2xl sm:text-4xl md:text-5xl lg:text-[52px] xl:text-[58px] leading-[0.98] sm:leading-[1.0] tracking-[-0.035em] text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] whitespace-nowrap">
+                      <h3 className="font-sans text-xl xs:text-2xl sm:text-4xl md:text-5xl lg:text-[52px] xl:text-[58px] leading-[1.05] sm:leading-[1.0] tracking-[-0.03em] sm:tracking-[-0.035em] text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] whitespace-normal sm:whitespace-nowrap break-words">
                         <span className="font-extrabold">{line.main}</span>
                         {line.connector && (
-                          <span className="font-light text-white/90 ml-2 sm:ml-2.5">
+                          <span className="font-light text-white/90 ml-1.5 sm:ml-2.5">
                             {line.connector}
                           </span>
                         )}
@@ -470,8 +527,8 @@ export default function Hero() {
                   ))}
                 </div>
 
-                {/* Description lines: Arranged across multiple lines (Image 1 Composition, Pure White) */}
-                <div className="mt-5 sm:mt-6 md:mt-7 flex flex-col space-y-1 sm:space-y-1.5 max-w-xs sm:max-w-sm md:max-w-md">
+                {/* Description lines */}
+                <div className={`mt-3 xs:mt-4 sm:mt-6 md:mt-7 flex flex-col space-y-1 sm:space-y-1.5 max-w-xs sm:max-w-sm md:max-w-md ${isLeft ? 'items-start' : 'items-start sm:items-end'}`}>
                   {msg.descLines.map((descLine, dIdx) => {
                     const totalLineIdx = msg.titleLines.length + dIdx;
                     return (
@@ -481,7 +538,7 @@ export default function Hero() {
                           if (!messageLineRefs.current[msgIdx]) messageLineRefs.current[msgIdx] = [];
                           messageLineRefs.current[msgIdx][totalLineIdx] = el;
                         }}
-                        className="overflow-hidden will-change-[clip-path,opacity,transform]"
+                        className="overflow-hidden will-change-[clip-path,opacity,transform] max-w-full"
                         style={{
                           opacity: 0,
                           visibility: 'hidden',
@@ -489,7 +546,7 @@ export default function Hero() {
                           WebkitClipPath: 'inset(0 100% 0 0)',
                         }}
                       >
-                        <p className="font-sans text-xs sm:text-[13.5px] md:text-[15px] lg:text-[16px] font-normal leading-[1.48] tracking-[-0.01em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]">
+                        <p className="font-sans text-xs xs:text-[13px] sm:text-[13.5px] md:text-[15px] lg:text-[16px] font-normal leading-[1.45] sm:leading-[1.48] tracking-[-0.01em] text-white/95 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)]">
                           {descLine}
                         </p>
                       </div>
@@ -506,14 +563,14 @@ export default function Hero() {
           ref={centerBrandingRef}
           className="absolute top-[80px] sm:top-[88px] left-0 right-0 bottom-0 z-30 flex flex-col items-center justify-center text-center px-4 sm:px-6 pointer-events-none will-change-[opacity,filter]"
         >
-          {/* Main Brand Title: VIRIL ACCESSOIRES (Matched to Side Subtitles Typography) */}
+          {/* Main Brand Title: VIRIL ACCESSOIRES */}
           <div className="pointer-events-auto max-w-5xl mx-auto px-4 -translate-y-3 sm:-translate-y-5 md:-translate-y-6">
-            <h1 className="font-sans font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-[68px] xl:text-[76px] tracking-[-0.03em] sm:tracking-[-0.035em] uppercase text-white drop-shadow-[0_4px_30px_rgba(0,0,0,0.95)] leading-[0.98] sm:leading-[1.0] select-none whitespace-normal sm:whitespace-nowrap">
+            <h1 className="font-sans font-extrabold text-2xl xs:text-3xl sm:text-5xl md:text-6xl lg:text-[68px] xl:text-[76px] tracking-[-0.03em] sm:tracking-[-0.035em] uppercase text-white drop-shadow-[0_4px_30px_rgba(0,0,0,0.95)] leading-[1.0] select-none whitespace-normal sm:whitespace-nowrap">
               VIRIL ACCESSOIRES
             </h1>
           </div>
 
-          {/* Responsive CTA Button: Moved slightly downward with increased vertical spacing */}
+          {/* Responsive CTA Button */}
           <div className="mt-8 sm:mt-12 md:mt-14 translate-y-3 sm:translate-y-4 md:translate-y-5 pointer-events-auto">
             <button
               onClick={() => unlockNav('boutique')}
