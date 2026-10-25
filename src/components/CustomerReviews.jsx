@@ -154,7 +154,7 @@ export default function CustomerReviews() {
       <div className="max-w-[1440px] mx-auto relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 pb-8 border-b border-white/10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 pb-8 border-b border-white/10 reveal-on-scroll">
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 mb-4">
               <Sparkles className="w-3.5 h-3.5 text-[#D1B992]" />
@@ -211,7 +211,7 @@ export default function CustomerReviews() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           
           {/* LEFT: Customer Review Submission Form (Matching Screenshot functionality in Luxury Theme) */}
-          <div className="lg:col-span-5 bg-[#0A0C16] border border-white/10 rounded-[2rem] p-6 sm:p-8 md:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] relative overflow-hidden">
+          <div className="lg:col-span-5 bg-[#0A0C16] border border-white/10 rounded-[2rem] p-6 sm:p-8 md:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] relative overflow-hidden reveal-on-scroll">
             <div className="mb-6">
               <span className="font-mono text-xs text-[#D1B992] tracking-widest uppercase block mb-1">
                 Partagez votre avis
@@ -370,7 +370,7 @@ export default function CustomerReviews() {
           </div>
 
           {/* RIGHT: Approved Public Reviews Display */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-6 reveal-on-scroll reveal-delay-1">
             
             <div className="flex items-center justify-between pb-2">
               <h3 className="font-sans font-medium text-xl sm:text-2xl text-white tracking-tight flex items-center gap-2.5">
@@ -477,7 +477,7 @@ export default function CustomerReviews() {
         </div>
 
         {/* 2. Prominent “VOIR LA COLLECTION” Call-to-Action Banner (Requirement 2) */}
-        <div className="mt-20 sm:mt-28 rounded-[2.5rem] border border-white/10 bg-gradient-to-r from-[#070913] via-[#0D1022] to-[#070913] p-8 sm:p-12 md:p-16 text-center relative overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
+        <div className="mt-20 sm:mt-28 rounded-[2.5rem] border border-white/10 bg-gradient-to-r from-[#070913] via-[#0D1022] to-[#070913] p-8 sm:p-12 md:p-16 text-center relative overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.8)] reveal-on-scroll">
           
           {/* Subtle Ambient Radial Glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#D1B992]/10 rounded-full blur-[120px] pointer-events-none" />

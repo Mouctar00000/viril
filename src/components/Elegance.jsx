@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useCart } from '../context/CartContext';
 import { PRODUCTS, CATEGORIES } from '../data/products';
 import ProductCustomizerModal from './ProductCustomizerModal';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -28,6 +29,9 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
   const gridRef = useRef(null);
   const isFirstFilterRender = useRef(true);
 
+  // Initialize compositor-friendly scroll reveal animations
+  useScrollReveal('.reveal-on-scroll', [mode]);
+
   // Sequential Animation Showcase: SAC (sacc.mp4) -> CHAUSSURE (chaussure.mp4) -> MONTRE (montre.mp4) -> PORTE-MONNAIE (porte-monnaie.mp4)
   const showcaseProducts = useMemo(() => {
     const sacc = PRODUCTS.find((p) => p.id === 'art-3');
@@ -38,109 +42,76 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
   }, []);
 
   const [currentShowcaseIdx, setCurrentShowcaseIdx] = useState(0);
+  const [prevShowcaseIdx, setPrevShowcaseIdx] = useState(null);
   const activeShowcase = showcaseProducts[currentShowcaseIdx] || showcaseProducts[0];
   const isTransitioningRef = useRef(false);
+  const transitionTimerRef = useRef(null);
 
-  // Reliable transition triggers: SAC (0) -> CHAUSSURE (1) -> MONTRE (2) -> PORTE-MONNAIE (3) -> SAC (0)
-  const handleSaccEnded = () => {
-    if (isTransitioningRef.current || currentShowcaseIdx !== 0) return;
+  const videoRefs = useMemo(
+    () => [saccVideoRef, chaussureVideoRef, montreVideoRef, porteMonnaieVideoRef],
+    []
+  );
+
+  // Seamless crossfade transition coordinator: plays incoming video before fading out outgoing video
+  // Guarantees ZERO black flashes, ZERO frozen frames, and ZERO layout jumps
+  const transitionToShowcase = useCallback((nextIdx) => {
+    if (isTransitioningRef.current || nextIdx === currentShowcaseIdx) return;
     isTransitioningRef.current = true;
-    setCurrentShowcaseIdx(1);
-    setTimeout(() => {
-      isTransitioningRef.current = false;
-    }, 300);
-  };
 
-  const handleChaussureEnded = () => {
-    if (isTransitioningRef.current || currentShowcaseIdx !== 1) return;
-    isTransitioningRef.current = true;
-    setCurrentShowcaseIdx(2);
-    setTimeout(() => {
-      isTransitioningRef.current = false;
-    }, 300);
-  };
+    const outgoingIdx = currentShowcaseIdx;
+    setPrevShowcaseIdx(outgoingIdx);
+    setCurrentShowcaseIdx(nextIdx);
 
-  const handleMontreEnded = () => {
-    if (isTransitioningRef.current || currentShowcaseIdx !== 2) return;
-    isTransitioningRef.current = true;
-    setCurrentShowcaseIdx(3);
-    setTimeout(() => {
-      isTransitioningRef.current = false;
-    }, 300);
-  };
-
-  const handlePorteMonnaieEnded = () => {
-    if (isTransitioningRef.current || currentShowcaseIdx !== 3) return;
-    isTransitioningRef.current = true;
-    setCurrentShowcaseIdx(0);
-    setTimeout(() => {
-      isTransitioningRef.current = false;
-    }, 300);
-  };
-
-  const handleSaccTimeUpdate = (e) => {
-    const v = e.currentTarget;
-    if (v.duration && v.currentTime >= v.duration - 0.05) {
-      handleSaccEnded();
+    // 1. Immediately cue and play the incoming video asset
+    const incomingVideo = videoRefs[nextIdx]?.current;
+    if (incomingVideo) {
+      incomingVideo.currentTime = 0;
+      incomingVideo.playbackRate = 1.0;
+      incomingVideo.play().catch(() => {});
     }
-  };
 
-  const handleChaussureTimeUpdate = (e) => {
-    const v = e.currentTarget;
-    if (v.duration && v.currentTime >= v.duration - 0.05) {
-      handleChaussureEnded();
+    if (transitionTimerRef.current) {
+      clearTimeout(transitionTimerRef.current);
     }
-  };
 
-  const handleMontreTimeUpdate = (e) => {
-    const v = e.currentTarget;
-    if (v.duration && v.currentTime >= v.duration - 0.05) {
-      handleMontreEnded();
-    }
-  };
-
-  const handlePorteMonnaieTimeUpdate = (e) => {
-    const v = e.currentTarget;
-    if (v.duration && v.currentTime >= v.duration - 0.05) {
-      handlePorteMonnaieEnded();
-    }
-  };
-
-  // Synchronize playback: strictly play only the active video, pause and reset the other three
-  useEffect(() => {
-    const videos = [
-      saccVideoRef.current,
-      chaussureVideoRef.current,
-      montreVideoRef.current,
-      porteMonnaieVideoRef.current
-    ];
-
-    videos.forEach((v, idx) => {
-      if (!v) return;
-      if (idx === currentShowcaseIdx) {
-        v.currentTime = 0;
-        v.playbackRate = 1.0;
-        v.play().catch(() => {});
-      } else {
-        v.pause();
-        v.currentTime = 0;
+    // 2. Allow 450ms crossfade overlap: keep outgoing video running cleanly until incoming is 100% visible
+    transitionTimerRef.current = setTimeout(() => {
+      const outgoingVideo = videoRefs[outgoingIdx]?.current;
+      if (outgoingVideo) {
+        outgoingVideo.pause();
+        outgoingVideo.currentTime = 0;
       }
-    });
-  }, [currentShowcaseIdx]);
+      setPrevShowcaseIdx(null);
+      isTransitioningRef.current = false;
+    }, 450);
+  }, [currentShowcaseIdx, videoRefs]);
 
-  // Catalog Filter & Search States (Inspired by Screenshot 1: Product Display)
+  const handleNextShowcase = () => {
+    transitionToShowcase((currentShowcaseIdx + 1) % showcaseProducts.length);
+  };
+
+  const handlePrevShowcase = () => {
+    transitionToShowcase((currentShowcaseIdx - 1 + showcaseProducts.length) % showcaseProducts.length);
+  };
+
+  // Initial autoplay on first render
+  useEffect(() => {
+    const firstVideo = saccVideoRef.current;
+    if (firstVideo) {
+      firstVideo.currentTime = 0;
+      firstVideo.playbackRate = 1.0;
+      firstVideo.play().catch(() => {});
+    }
+    return () => {
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    };
+  }, []);
+
+  // Catalog Filter & Search States
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showOnlyInStock, setShowOnlyInStock] = useState(false);
   const [localCustomizingProduct, setLocalCustomizingProduct] = useState(null);
-
-  const handleNextShowcase = () => {
-    setCurrentShowcaseIdx((prev) => (prev + 1) % showcaseProducts.length);
-  };
-
-  const handlePrevShowcase = () => {
-    setCurrentShowcaseIdx((prev) => (prev - 1 + showcaseProducts.length) % showcaseProducts.length);
-  };
 
   const handleOpenConfigurator = (product) => {
     if (onOpenCustomizer) {
@@ -297,36 +268,25 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
   }, [selectedCategory, searchQuery, showOnlyInStock, mode]);
 
   const renderShowcase = () => (
-    <div className="relative rounded-[2.5rem] border border-white/10 bg-[#000000] p-6 sm:p-12 md:p-16 overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.8)] min-h-[960px] sm:min-h-[920px] lg:min-h-[660px]">
+    <div className="relative rounded-[2.5rem] border border-white/10 bg-[#000000] p-6 sm:p-12 md:p-16 overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
 
-          {/* Section Header */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10 sm:mb-12 relative z-10">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 mb-3">
-                <Sparkles className="w-3.5 h-3.5 text-[#D1B992]" />
-                <span className="font-sans text-[10.5px] uppercase tracking-[0.25em] text-[#D1B992] font-medium">
-                  Pleins Feux sur l'Excellence // Édition 2026
-                </span>
-              </div>
-              <h2 className="font-sans font-medium text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-[1.05]">
-                L'art de{' '}
-                <span className="font-serif italic text-[#D1B992] font-normal">
-                  l'élégance suprême.
-                </span>
-              </h2>
-            </div>
+          {/* Section Header: Exactly "Plein feu sur l'excellence" without edition or extra words */}
+          <div className="mb-8 sm:mb-12 relative z-10">
+            <h2 className="font-sans font-medium text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white tracking-tight leading-[1.1] whitespace-normal sm:whitespace-nowrap">
+              Plein feu sur <span className="font-serif italic text-[#D1B992] font-normal">l'excellence</span>
+            </h2>
           </div>
 
-          {/* Showcase Stage (Matching Screenshot 3: Pure Black Seamless Stage + Floating Product Visual + Flanking Navigation) */}
+          {/* Showcase Stage: Pure Black Seamless Stage + Floating Product Visual + Flanking Navigation */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center relative z-10">
             
             {/* Left: Floating Product Visual Stage with Flanking Left & Right Navigation Arrows */}
-            <div className="lg:col-span-7 relative flex items-center justify-center py-4 sm:py-8">
+            <div className="lg:col-span-7 relative flex items-center justify-center py-4 sm:py-6">
               
               {/* Product Visual Wrapper with Flanking Arrows */}
               <div className="relative w-full max-w-[500px] flex items-center justify-center px-4 sm:px-6">
                 
-                {/* Left Navigation Arrow (Repositioned to the left of the visual, vertically centered) */}
+                {/* Left Navigation Arrow */}
                 <button
                   onClick={handlePrevShowcase}
                   aria-label="Pièce précédente"
@@ -335,7 +295,7 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
                   <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
 
-                {/* Right Navigation Arrow (Repositioned to the right of the visual, vertically centered) */}
+                {/* Right Navigation Arrow */}
                 <button
                   onClick={handleNextShowcase}
                   aria-label="Pièce suivante"
@@ -344,82 +304,71 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
                   <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
 
-                {/* Product Visual Container (Pure Black #000000 Seamless Integration) */}
+                {/* Product Visual Container with Stable Aspect Ratio & Shimmer Fallback */}
                 <div className="relative w-full aspect-square max-w-[430px] flex items-center justify-center">
-                  {/* Floating Product Visual: Automatic Sequential 3D Rotating Video Animation */}
+                  
+                  {/* Floating Product Visual: 3D Video Asset with Instant Poster Fallback */}
                   <div
-                    className="relative z-10 w-[88%] sm:w-[92%] aspect-square rounded-[2rem] overflow-hidden group cursor-pointer animate-in fade-in zoom-in-95 duration-500 transform hover:-translate-y-1.5 transition-transform bg-[#000000] shadow-[0_15px_45px_rgba(0,0,0,0.9)]"
+                    className="relative z-10 w-[88%] sm:w-[92%] aspect-square rounded-[2rem] overflow-hidden group cursor-pointer bg-[#000000] shadow-[0_15px_45px_rgba(0,0,0,0.9)]"
                     onClick={() => handleOpenConfigurator(activeShowcase)}
                   >
-                    {/* Video 1: SAC (SAC.mp4) - Plays complete rotation first */}
-                    <video
-                      ref={saccVideoRef}
-                      src="/videos/SAC.mp4"
-                      autoPlay
-                      muted
-                      playsInline
-                      preload="auto"
-                      aria-label="Animation Sac VIRIL"
-                      onEnded={handleSaccEnded}
-                      onTimeUpdate={handleSaccTimeUpdate}
-                      style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
-                      className={`absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform pointer-events-none transition-opacity duration-300 ease-in-out ${
-                        currentShowcaseIdx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                      }`}
-                    />
+                    {/* Underlying Skeleton Shimmer Placeholder (Guarantees zero blank screen on slow network) */}
+                    <div className="absolute inset-0 luxury-skeleton-shimmer z-0 pointer-events-none" />
 
-                    {/* Video 2: CHAUSSURE (chaussure.mp4) - Plays complete rotation second */}
-                    <video
-                      ref={chaussureVideoRef}
-                      src="/videos/chaussure.mp4"
-                      muted
-                      playsInline
-                      preload="auto"
-                      aria-label="Animation Chaussure VIRIL"
-                      onEnded={handleChaussureEnded}
-                      onTimeUpdate={handleChaussureTimeUpdate}
-                      style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
-                      className={`absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform pointer-events-none transition-opacity duration-300 ease-in-out ${
-                        currentShowcaseIdx === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                      }`}
-                    />
+                    {/* Sequential Product Videos with Smooth Crossfade Overlap */}
+                    {showcaseProducts.map((prod, idx) => {
+                      const isActive = idx === currentShowcaseIdx;
+                      const isOutgoing = idx === prevShowcaseIdx;
 
-                    {/* Video 3: MONTRE (montre.mp4) - Plays complete rotation third */}
-                    <video
-                      ref={montreVideoRef}
-                      src="/videos/montre.mp4"
-                      muted
-                      playsInline
-                      preload="auto"
-                      aria-label="Animation Montre VIRIL"
-                      onEnded={handleMontreEnded}
-                      onTimeUpdate={handleMontreTimeUpdate}
-                      style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
-                      className={`absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform pointer-events-none transition-opacity duration-300 ease-in-out ${
-                        currentShowcaseIdx === 2 ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                      }`}
-                    />
+                      return (
+                        <div
+                          key={prod.id}
+                          className={`absolute inset-0 w-full h-full transition-opacity duration-500 ease-out ${
+                            isActive
+                              ? 'opacity-100 z-10 pointer-events-auto'
+                              : isOutgoing
+                              ? 'opacity-80 z-5 pointer-events-none'
+                              : 'opacity-0 z-0 pointer-events-none'
+                          }`}
+                        >
+                          {/* High-Resolution Sharp Poster Image as Instant Fallback */}
+                          <img
+                            src={prod.image}
+                            alt={prod.name}
+                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                              isActive ? 'opacity-100' : 'opacity-0'
+                            }`}
+                            loading={idx === 0 ? 'eager' : 'lazy'}
+                          />
 
-                    {/* Video 4: PORTE-MONNAIE (porte-monnaie.mp4) - Plays complete rotation fourth */}
-                    <video
-                      ref={porteMonnaieVideoRef}
-                      src="/videos/porte-monnaie.mp4"
-                      muted
-                      playsInline
-                      preload="auto"
-                      aria-label="Animation Porte-Monnaie VIRIL"
-                      onEnded={handlePorteMonnaieEnded}
-                      onTimeUpdate={handlePorteMonnaieTimeUpdate}
-                      style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
-                      className={`absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform pointer-events-none transition-opacity duration-300 ease-in-out ${
-                        currentShowcaseIdx === 3 ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                      }`}
-                    />
+                          {/* 3D Quad-HD Rotating Video Asset */}
+                          <video
+                            ref={videoRefs[idx]}
+                            src={prod.video}
+                            autoPlay={idx === 0}
+                            muted
+                            playsInline
+                            preload={idx <= 1 ? 'auto' : 'metadata'}
+                            aria-label={`Animation ${prod.name}`}
+                            onEnded={() => transitionToShowcase((idx + 1) % showcaseProducts.length)}
+                            onTimeUpdate={(e) => {
+                              const v = e.currentTarget;
+                              if (isActive && v.duration && v.currentTime >= v.duration - 0.08) {
+                                transitionToShowcase((idx + 1) % showcaseProducts.length);
+                              }
+                            }}
+                            style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
+                            className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform pointer-events-none"
+                          />
+                        </div>
+                      );
+                    })}
 
                     {/* Restored Original Luxury Frosted Gold Glass Capsule Badge */}
                     {activeShowcase.badge && (
                       <div
-                        className="absolute top-4 right-4 z-20 text-[10px] tracking-widest uppercase font-mono shadow-[0_6px_25px_rgba(0,0,0,0.7)] flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-badge-pill transition-all duration-300 pointer-events-none"
+                        key={activeShowcase.badge}
+                        className="absolute top-4 right-4 z-20 text-[10px] tracking-widest uppercase font-mono shadow-[0_6px_25px_rgba(0,0,0,0.7)] flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-badge-pill transition-opacity duration-300 pointer-events-none"
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-[#D1B992] shadow-[0_0_8px_#D1B992] animate-pulse" />
                         <span>{activeShowcase.badge}</span>
@@ -433,104 +382,121 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
             </div>
 
             {/* Right: Narrative Description & Customization Callout */}
-            <div className="lg:col-span-5 min-h-[490px] sm:min-h-[470px] lg:min-h-[510px] flex flex-col justify-between">
-              <div key={activeShowcase.id} className="animate-showcase-fade flex flex-col justify-between h-full space-y-5 sm:space-y-6">
-                
-                <div>
-                  <span className="font-mono text-xs text-[#D1B992] tracking-widest uppercase block mb-1">
-                    {activeShowcase.categoryLabel}
-                  </span>
-                  <h3 className="font-sans font-medium text-2xl sm:text-3xl md:text-4xl text-white tracking-tight leading-snug min-h-[3.2rem] sm:min-h-[4rem] flex items-center">
-                    {activeShowcase.name}
-                  </h3>
-                  <p className="font-sans text-xs uppercase tracking-wider text-[#9AA0B4] mt-1">
-                    {activeShowcase.sub}
-                  </p>
-                </div>
-
-                {/* Star Rating & Review count */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center text-[#D4AF37]">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-                  <span className="font-mono text-xs text-white font-semibold">
-                    {activeShowcase.rating.toFixed(1)} / 5.0
-                  </span>
-                  <span className="text-xs text-[#5E6479]">
-                    ({activeShowcase.reviewsCount} avis vérifiés)
-                  </span>
-                </div>
-
-                {/* Highlight Quote */}
-                <blockquote className="font-serif italic text-base sm:text-lg text-[#FAF8F5] leading-relaxed border-l-2 border-[#D1B992] pl-4 py-1 min-h-[3.8rem] flex items-center">
-                  « {activeShowcase.featureQuote} »
-                </blockquote>
-
-                <p className="font-sans text-sm text-[#9AA0B4] leading-relaxed min-h-[4.4rem]">
-                  {activeShowcase.description}
-                </p>
-
-                {/* Specifications Badges */}
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 rounded-xl border border-white/10 bg-[#04050A]">
-                    <span className="text-[10px] uppercase tracking-wider text-[#5E6479] block mb-0.5">Matière première</span>
-                    <strong className="text-white font-medium truncate block">{activeShowcase.tag}</strong>
-                  </div>
-                  <div className="p-3 rounded-xl border border-white/10 bg-[#04050A]">
-                    <span className="text-[10px] uppercase tracking-wider text-[#5E6479] block mb-0.5">Sur-mesure</span>
-                    <strong className="text-[#D1B992] font-medium block">Gravure Laser Dispo</strong>
-                  </div>
-                </div>
-
-                {/* Pricing & CTA */}
-                <div className="pt-2 space-y-4">
-                  <div className="text-center sm:text-left">
-                    <span className="text-[10.5px] uppercase tracking-wider text-[#5E6479] block mb-0.5">Prix création</span>
-                    <div className="flex items-baseline justify-center sm:justify-start gap-2.5">
-                      <span className="font-sans font-bold text-2xl sm:text-3xl text-white">
-                        {formatMoney(activeShowcase.price)}
-                      </span>
-                      {activeShowcase.originalPrice && (
-                        <span className="font-mono text-sm text-[#5E6479] line-through">
-                          {formatMoney(activeShowcase.originalPrice)}
+            <div className="lg:col-span-5 relative">
+              
+              {/* CSS Grid Shared-Cell: col-start-1 row-start-1 locks the container height to the maximum of all 4 products.
+                  Guarantees 100% stable container height, zero layout shifts, and silky cross-fade text transitions! */}
+              <div className="grid grid-cols-1 grid-rows-1 w-full">
+                {showcaseProducts.map((prod, idx) => {
+                  const isActive = idx === currentShowcaseIdx;
+                  return (
+                    <div
+                      key={prod.id}
+                      className={`col-start-1 row-start-1 w-full flex flex-col justify-between space-y-5 sm:space-y-6 transition-all duration-500 ease-out ${
+                        isActive
+                          ? 'opacity-100 translate-y-0 pointer-events-auto z-10'
+                          : 'opacity-0 translate-y-3 pointer-events-none z-0'
+                      }`}
+                      aria-hidden={!isActive}
+                    >
+                      <div>
+                        <span className="font-mono text-xs text-[#D1B992] tracking-widest uppercase block mb-1">
+                          {prod.categoryLabel}
                         </span>
-                      )}
-                    </div>
-                  </div>
+                        <h3 className="font-sans font-medium text-2xl sm:text-3xl md:text-4xl text-white tracking-tight leading-snug">
+                          {prod.name}
+                        </h3>
+                        <p className="font-sans text-xs uppercase tracking-wider text-[#9AA0B4] mt-1">
+                          {prod.sub}
+                        </p>
+                      </div>
 
-                  <div className="w-full flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2.5 sm:gap-3">
-                    <button
-                      onClick={() => handleOpenConfigurator(activeShowcase)}
-                      className="btn-main btn--line cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto py-2.5 sm:py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] tracking-wider"
-                    >
-                      <span>Personnaliser ce modèle</span>
-                      <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
-                    </button>
-                    <button
-                      onClick={() => unlockNav('boutique')}
-                      className="btn-main btn--solid btn-light-sweep cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto py-2.5 sm:py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] tracking-wider shadow-[0_0_20px_rgba(209,185,146,0.4)]"
-                    >
-                      <span>Découvrir la collection</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-black flex-shrink-0" />
-                    </button>
-                  </div>
-                </div>
+                      {/* Star Rating & Review count */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center text-[#D4AF37]">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-current" />
+                          ))}
+                        </div>
+                        <span className="font-mono text-xs text-white font-semibold">
+                          {prod.rating.toFixed(1)} / 5.0
+                        </span>
+                        <span className="text-xs text-[#5E6479]">
+                          ({prod.reviewsCount} avis vérifiés)
+                        </span>
+                      </div>
+
+                      {/* Highlight Quote */}
+                      <blockquote className="font-serif italic text-base sm:text-lg text-[#FAF8F5] leading-relaxed border-l-2 border-[#D1B992] pl-4 py-1">
+                        « {prod.featureQuote} »
+                      </blockquote>
+
+                      <p className="font-sans text-sm text-[#9AA0B4] leading-relaxed">
+                        {prod.description}
+                      </p>
+
+                      {/* Specifications Badges */}
+                      <div className="grid grid-cols-2 gap-3 text-xs">
+                        <div className="p-3 rounded-xl border border-white/10 bg-[#04050A]">
+                          <span className="text-[10px] uppercase tracking-wider text-[#5E6479] block mb-0.5">Matière première</span>
+                          <strong className="text-white font-medium truncate block">{prod.tag}</strong>
+                        </div>
+                        <div className="p-3 rounded-xl border border-white/10 bg-[#04050A]">
+                          <span className="text-[10px] uppercase tracking-wider text-[#5E6479] block mb-0.5">Sur-mesure</span>
+                          <strong className="text-[#D1B992] font-medium block">Gravure Laser Dispo</strong>
+                        </div>
+                      </div>
+
+                      {/* Pricing & CTA */}
+                      <div className="pt-2 space-y-4">
+                        <div className="text-center sm:text-left">
+                          <span className="text-[10.5px] uppercase tracking-wider text-[#5E6479] block mb-0.5">Prix création</span>
+                          <div className="flex items-baseline justify-center sm:justify-start gap-2.5">
+                            <span className="font-sans font-bold text-2xl sm:text-3xl text-white">
+                              {formatMoney(prod.price)}
+                            </span>
+                            {prod.originalPrice && (
+                              <span className="font-mono text-sm text-[#5E6479] line-through">
+                                {formatMoney(prod.originalPrice)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="w-full flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2.5 sm:gap-3">
+                          <button
+                            onClick={() => handleOpenConfigurator(prod)}
+                            className="btn-main btn--line cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto py-2.5 sm:py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] tracking-wider"
+                          >
+                            <span>Personnaliser ce modèle</span>
+                            <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
+                          </button>
+                          <button
+                            onClick={() => unlockNav('boutique')}
+                            className="btn-main btn--solid btn-light-sweep cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto py-2.5 sm:py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] tracking-wider shadow-[0_0_20px_rgba(209,185,146,0.4)]"
+                          >
+                            <span>Découvrir la collection</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-black flex-shrink-0" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
             </div>
 
           </div>
 
-          {/* Interactive Pagination Dots (Inspired by Screenshot 3) */}
+          {/* Interactive Pagination Dots */}
           <div className="flex items-center justify-center gap-2.5 mt-8 pt-6 border-t border-white/10 relative z-10">
             {showcaseProducts.map((p, idx) => {
               const isActive = idx === currentShowcaseIdx;
               return (
                 <button
                   key={p.id}
-                  onClick={() => setCurrentShowcaseIdx(idx)}
+                  onClick={() => transitionToShowcase(idx)}
                   className={`transition-all duration-300 rounded-full cursor-pointer ${
                     isActive
                       ? 'w-8 h-2 bg-[#D1B992] shadow-[0_0_12px_#D1B992]'
@@ -682,6 +648,9 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
                       onClick={() => handleOpenConfigurator(product)}
                       className="relative w-full aspect-square rounded-2xl bg-[#04050A] border border-white/5 p-4 flex items-center justify-center overflow-hidden mb-5 cursor-pointer group-hover:border-[#D1B992]/25 transition-all duration-500 shadow-inner"
                     >
+                      {/* Luxury Skeleton Shimmer for Slow Connections */}
+                      <div className="absolute inset-0 luxury-skeleton-shimmer z-0 pointer-events-none opacity-40" />
+
                       {/* Subtle Ambient Backing Glow */}
                       <div 
                         className={`absolute inset-0 opacity-20 filter blur-xl transition-opacity duration-700 group-hover:opacity-50 ${

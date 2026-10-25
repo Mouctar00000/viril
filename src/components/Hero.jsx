@@ -200,7 +200,9 @@ export default function Hero() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const w = Math.round(rect.width * dpr);
       const h = Math.round(rect.height * dpr);
-      if (canvas.width !== w || canvas.height !== h) {
+      // Only resize canvas if width changed or height changed significantly (> 70px)
+      // to avoid canvas clears during mobile URL bar movements
+      if (canvas.width !== w || Math.abs(canvas.height - h) > 70) {
         canvas.width = w;
         canvas.height = h;
         needsResizeRedrawRef.current = true;
@@ -416,8 +418,16 @@ export default function Hero() {
       });
     }, containerRef);
 
+    let lastWidth = typeof window !== 'undefined' ? window.innerWidth : 0;
     const handleResize = () => {
-      ScrollTrigger.refresh();
+      // Only refresh ScrollTrigger if the window width changed (orientation change or screen resize).
+      // On mobile browsers, scrolling up/down toggles the URL bar, changing window.innerHeight only.
+      // Calling ScrollTrigger.refresh() on innerHeight changes causes pin spacing recalculation
+      // and resets the scroll offset, causing jarring scroll jumps or pulling backward.
+      if (Math.abs(window.innerWidth - lastWidth) > 10) {
+        lastWidth = window.innerWidth;
+        ScrollTrigger.refresh();
+      }
     };
 
     window.addEventListener('resize', handleResize);

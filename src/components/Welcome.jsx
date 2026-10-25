@@ -10,7 +10,7 @@ export default function Welcome() {
       {/* Background Gold Subtle Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-[#D1B992]/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto relative z-10">
+      <div className="max-w-4xl mx-auto relative z-10 reveal-on-scroll">
         {/* White Phoenix Brand Emblem */}
         <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 rounded-3xl bg-white/[0.04] border border-white/10 flex items-center justify-center p-3.5 sm:p-4 shadow-[0_0_35px_rgba(255,255,255,0.06)] hover:border-[#D1B992]/40 transition-all group">
           <img

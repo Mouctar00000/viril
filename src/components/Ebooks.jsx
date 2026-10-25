@@ -138,7 +138,7 @@ export default function Ebooks({ onPreviewEbook, onDirectCheckout }) {
       <div className="max-w-[1400px] mx-auto relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
+        <div className="text-center max-w-3xl mx-auto mb-14 reveal-on-scroll">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 mb-6 backdrop-blur-sm">
             <span className="w-2 h-2 rounded-full bg-[#D1B992] animate-pulse" />
             <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-[#D1B992] font-semibold">
@@ -175,10 +175,12 @@ export default function Ebooks({ onPreviewEbook, onDirectCheckout }) {
 
         {/* Dynamic Book Showcase Grid (Realistic 3D covers with studio podium) */}
         <div className="flex flex-wrap justify-center gap-7 lg:gap-8 mb-24">
-          {filteredEbooks.map((ebook) => (
+          {filteredEbooks.map((ebook, idx) => (
             <article
               key={ebook.id}
-              className="group w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-[390px] rounded-3xl border border-white/10 bg-[#0A0C16] hover:border-[#D1B992]/40 p-5 sm:p-6 flex flex-col justify-between transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(209,185,146,0.15)] relative"
+              className={`group w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-[390px] rounded-3xl border border-white/10 bg-[#0A0C16] hover:border-[#D1B992]/40 p-5 sm:p-6 flex flex-col justify-between transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(209,185,146,0.15)] relative reveal-on-scroll ${
+                idx % 3 === 1 ? 'reveal-delay-1' : idx % 3 === 2 ? 'reveal-delay-2' : ''
+              }`}
             >
               <div>
                 {/* 3D Realistic Book Podium Showcase Stage */}

@@ -42,7 +42,7 @@ export default function Contact() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-12 lg:gap-20 items-start">
           
           {/* Left Column: Contact Info (Matching Screenshot 2) */}
-          <div className="space-y-6">
+          <div className="space-y-6 reveal-on-scroll">
             <p className="font-sans text-[11px] uppercase tracking-[0.25em] text-[#D1B992] font-medium">
               Contact
             </p>
@@ -137,7 +137,7 @@ export default function Contact() {
           </div>
 
           {/* Right Column: Contact Form (Matching Screenshot 2) */}
-          <div className="bg-[#0A0C16] p-6 sm:p-10 rounded-2xl border border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
+          <div className="bg-[#0A0C16] p-6 sm:p-10 rounded-2xl border border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.4)] reveal-on-scroll reveal-delay-1">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>

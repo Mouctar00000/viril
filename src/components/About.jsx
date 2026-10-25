@@ -54,7 +54,7 @@ export default function About() {
         <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-20 items-start mb-24">
           
           {/* Left Column: Notre Histoire */}
-          <div className="space-y-6">
+          <div className="space-y-6 reveal-on-scroll">
             <p className="font-sans text-[11px] uppercase tracking-[0.25em] text-[#D1B992] font-medium">
               Notre histoire
             </p>
@@ -82,7 +82,7 @@ export default function About() {
           </div>
 
           {/* Right Column: Nos Valeurs */}
-          <div className="lg:pl-8">
+          <div className="lg:pl-8 reveal-on-scroll reveal-delay-1">
             <h3 className="font-sans font-medium text-xl sm:text-2xl text-white mb-6">
               Nos valeurs
             </h3>
@@ -109,7 +109,7 @@ export default function About() {
         </div>
 
         {/* Process Steps (Matching Screenshot 3) */}
-        <div>
+        <div className="reveal-on-scroll">
           <h3 className="font-sans font-medium text-2xl sm:text-3xl text-white text-center mb-12">
             Notre processus créatif
           </h3>

@@ -14,10 +14,12 @@ import EbookPreviewModal from './components/EbookPreviewModal';
 import ProductCustomizerModal from './components/ProductCustomizerModal';
 import CustomerReviews from './components/CustomerReviews';
 import { useAdaptiveFavicon } from './hooks/useAdaptiveFavicon';
+import { useScrollReveal } from './hooks/useScrollReveal';
 
 function MainContent() {
   useAdaptiveFavicon();
   const { navStage } = useCart();
+  useScrollReveal('.reveal-on-scroll', [navStage]);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [directCheckoutItem, setDirectCheckoutItem] = useState(null);
   const [previewEbook, setPreviewEbook] = useState(null);
