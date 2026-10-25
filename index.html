@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Official Adaptive Favicons (SVG with prefers-color-scheme) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" data-favicon-type="svg" />
+
+    <!-- Declarative Light & Dark Theme PNG Favicons for native browser support -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" media="(prefers-color-scheme: light)" data-favicon-type="png-32" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-dark-32x32.png" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" media="(prefers-color-scheme: light)" data-favicon-type="png-16" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-dark-16x16.png" media="(prefers-color-scheme: dark)" />
+
+    <!-- Universal Fallback & Mobile Icons -->
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    
+    <meta name="theme-color" content="#04050A" />
+    <meta name="apple-mobile-web-app-title" content="VIRIL" />
+    <meta name="application-name" content="VIRILACCESSORIES" />
+    <meta name="msapplication-TileColor" content="#04050A" />
+
+    <!-- Instant Pre-paint Theme Favicon Synchronizer (Zero-latency) -->
+    <script>
+      (function() {
+        try {
+          var darkMatcher = window.matchMedia('(prefers-color-scheme: dark)');
+          function syncFavicon(isDark) {
+            var svgEl = document.querySelector("link[data-favicon-type='svg']");
+            var p32El = document.querySelector("link[data-favicon-type='png-32']");
+            var p16El = document.querySelector("link[data-favicon-type='png-16']");
+            if (svgEl) svgEl.href = isDark ? '/favicon-dark.svg' : '/favicon-light.svg';
+            if (p32El) p32El.href = isDark ? '/favicon-dark-32x32.png' : '/favicon-32x32.png';
+            if (p16El) p16El.href = isDark ? '/favicon-dark-16x16.png' : '/favicon-16x16.png';
+          }
+          if (darkMatcher.addEventListener) {
+            darkMatcher.addEventListener('change', function(e) { syncFavicon(e.matches); });
+          } else if (darkMatcher.addListener) {
+            darkMatcher.addListener(function(e) { syncFavicon(e.matches); });
+          }
+          syncFavicon(darkMatcher.matches);
+        } catch(e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VIRILACCESSORIES — Le style dans les détails | Yaoundé, Cameroun</title>
+    <meta name="description" content="VIRILACCESSORIES — Redéfinir le luxe masculin. Accessoires premium, e-books et style pour l'homme moderne. Yaoundé, Cameroun." />
+    
+    <!-- Google Fonts: Plus Jakarta Sans, Inter, Cormorant Garamond, Playfair Display & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@1,400;1,500;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-[#04050A] text-[#FFFFFF] antialiased selection:bg-[#00E5FF] selection:text-[#000000] overflow-x-hidden">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

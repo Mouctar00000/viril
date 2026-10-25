@@ -1,0 +1,32 @@
+[
+  {
+    "id": "rev-1792925115435-c96kx",
+    "name": "Alexandre Eboa",
+    "rating": 5,
+    "comment": "nyrj hgfrjngfnyrytrnyt",
+    "date": "25 octobre 2026",
+    "createdAt": "2026-10-25T10:45:15.433Z",
+    "status": "approved",
+    "verifiedCustomer": true
+  },
+  {
+    "id": "rev-1792874386460-0mzwt",
+    "name": "Alexandre Eboa",
+    "rating": 5,
+    "comment": "d fs bfdxgndmhfddgnd",
+    "date": "24 octobre 2026",
+    "createdAt": "2026-10-24T20:39:46.456Z",
+    "status": "approved",
+    "verifiedCustomer": true
+  },
+  {
+    "id": "rev-1792856695039-h96xa",
+    "name": "Alexandre Eboa",
+    "rating": 5,
+    "comment": "Finitions d'exception sur le sac Croco. Présence incomparable en réunion d'affaires, service client impeccable à Yaoundé.",
+    "date": "24 octobre 2026",
+    "createdAt": "2026-10-24T15:44:55.038Z",
+    "status": "approved",
+    "verifiedCustomer": true
+  }
+]
