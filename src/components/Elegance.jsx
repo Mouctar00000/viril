@@ -366,10 +366,10 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
                   className="relative z-10 w-[85%] sm:w-[90%] aspect-square rounded-[2rem] overflow-hidden shadow-[0_25px_50px_rgba(0,0,0,0.85)] border border-white/10 group cursor-pointer animate-in fade-in zoom-in-95 duration-500 transform hover:-translate-y-2 transition-transform bg-[#04050A]"
                   onClick={() => handleOpenConfigurator(activeShowcase)}
                 >
-                  {/* Video 1: SAC (sacc.mp4) - Plays complete rotation first */}
+                  {/* Video 1: SAC (SAC.mp4) - Plays complete rotation first */}
                   <video
                     ref={saccVideoRef}
-                    src="/videos/sacc.mp4"
+                    src="/videos/SAC.mp4"
                     autoPlay
                     muted
                     playsInline
