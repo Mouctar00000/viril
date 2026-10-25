@@ -163,7 +163,7 @@ export const PRODUCTS = [
     originalPrice: 45000,
     image: '/images/porte-monnaie.jpg',
     video: '/videos/porte-monnaie.mp4',
-    badge: 'Exclusivité',
+    badge: 'Exclusif',
     rating: 4.9,
     reviewsCount: 67,
     tag: 'Protection Anti-RFID & Cuir Italien',

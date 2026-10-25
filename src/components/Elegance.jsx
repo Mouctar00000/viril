@@ -297,11 +297,7 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
   }, [selectedCategory, searchQuery, showOnlyInStock, mode]);
 
   const renderShowcase = () => (
-    <div className="relative rounded-[2.5rem] border border-white/10 bg-[#0A0C16] p-6 sm:p-12 md:p-16 overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
-          
-          {/* Subtle Ambient Vignette */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D1B992]/10 rounded-full blur-[140px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#D4AF37]/10 rounded-full blur-[140px] pointer-events-none" />
+    <div className="relative rounded-[2.5rem] border border-white/10 bg-[#000000] p-6 sm:p-12 md:p-16 overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
 
           {/* Section Header */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 relative z-10">
@@ -345,25 +341,11 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
             {/* Left: Floating Product Visual Stage with Layered Paint Strokes */}
             <div className="lg:col-span-7 relative flex items-center justify-center py-6 sm:py-10">
               
-              {/* Dynamic Fluid "Paint Stroke" / Pill Backdrop Effect (Inspired by Screenshot 3) */}
+              {/* Product Visual Container (Pure Black #000000 Seamless Integration) */}
               <div className="relative w-full max-w-[460px] aspect-square flex items-center justify-center">
-                
-                {/* Layer 1: Angled Organic Background Shape 1 (Midnight Gold Accent) */}
-                <div 
-                  className={`absolute w-[80%] h-[115%] rounded-[999px] transform -rotate-45 opacity-70 filter blur-sm transition-all duration-700 pointer-events-none ${
-                    activeShowcase.paintBgShape || 'bg-[#D1B992]/30'
-                  }`}
-                />
-
-                {/* Layer 2: Angled Organic Secondary Pill Stroke */}
-                <div className="absolute w-[65%] h-[100%] rounded-[999px] transform rotate-12 bg-gradient-to-r from-black/80 via-white/5 to-transparent border border-white/15 backdrop-blur-sm pointer-events-none" />
-
-                {/* Layer 3: Soft Ground Drop Shadow */}
-                <div className="absolute bottom-6 w-3/4 h-10 rounded-full bg-black/80 blur-xl pointer-events-none" />
-
-                {/* Floating Product Visual: Automatic Sequential 3D Rotating Video Animation (SAC -> CHAUSSURE) */}
+                {/* Floating Product Visual: Automatic Sequential 3D Rotating Video Animation */}
                 <div
-                  className="relative z-10 w-[85%] sm:w-[90%] aspect-square rounded-[2rem] overflow-hidden shadow-[0_25px_50px_rgba(0,0,0,0.85)] border border-white/10 group cursor-pointer animate-in fade-in zoom-in-95 duration-500 transform hover:-translate-y-2 transition-transform bg-[#04050A]"
+                  className="relative z-10 w-[85%] sm:w-[90%] aspect-square rounded-[2rem] overflow-hidden group cursor-pointer animate-in fade-in zoom-in-95 duration-500 transform hover:-translate-y-2 transition-transform bg-[#000000]"
                   onClick={() => handleOpenConfigurator(activeShowcase)}
                 >
                   {/* Video 1: SAC (SAC.mp4) - Plays complete rotation first */}
@@ -428,11 +410,27 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
                   />
                 </div>
 
-                {/* Tag Badge floating over the 3D rotating visual */}
-                <div className="absolute top-4 right-4 z-20 glass-badge-pill text-[10px] tracking-widest uppercase font-mono shadow-[0_6px_25px_rgba(0,0,0,0.7)]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#D1B992] shadow-[0_0_8px_#D1B992] animate-pulse" />
-                  <span>{activeShowcase.badge}</span>
-                </div>
+                {/* Tag Badge floating over the 3D rotating visual (Vivid Green for EXCLUSIF) */}
+                {activeShowcase.badge && (
+                  <div
+                    className={`absolute top-4 right-4 z-20 text-[10px] tracking-widest uppercase font-mono shadow-[0_6px_25px_rgba(0,0,0,0.7)] flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all duration-300 ${
+                      activeShowcase.badge.toLowerCase().includes('exclusi')
+                        ? 'bg-[#10B981] text-white font-bold border border-emerald-300/40 shadow-[0_0_20px_rgba(16,185,129,0.45)]'
+                        : 'glass-badge-pill'
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        activeShowcase.badge.toLowerCase().includes('exclusi')
+                          ? 'bg-white shadow-[0_0_8px_#ffffff] animate-pulse'
+                          : 'bg-[#D1B992] shadow-[0_0_8px_#D1B992] animate-pulse'
+                      }`}
+                    />
+                    <span>
+                      {activeShowcase.badge.toLowerCase().includes('exclusi') ? 'EXCLUSIF' : activeShowcase.badge}
+                    </span>
+                  </div>
+                )}
               </div>
 
             </div>
@@ -813,7 +811,7 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
 
   if (mode === 'showcase') {
     return (
-      <section id="excellence" className="relative w-full py-16 sm:py-24 px-6 sm:px-10 md:px-16 bg-[#04050A]">
+      <section id="excellence" className="relative w-full py-16 sm:py-24 px-6 sm:px-10 md:px-16 bg-[#000000]">
         <div className="max-w-[1440px] mx-auto">
           {renderShowcase()}
         </div>
@@ -846,7 +844,7 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
   }
 
   return (
-    <section id="collections" className="relative w-full py-24 sm:py-32 px-6 sm:px-10 md:px-16 bg-[#04050A]">
+    <section id="collections" className="relative w-full py-24 sm:py-32 px-6 sm:px-10 md:px-16 bg-[#000000]">
       <div className="max-w-[1440px] mx-auto space-y-24">
         {renderShowcase()}
         {renderCatalog()}
