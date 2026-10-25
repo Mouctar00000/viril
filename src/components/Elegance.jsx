@@ -23,23 +23,25 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
   const saccVideoRef = useRef(null);
   const chaussureVideoRef = useRef(null);
   const montreVideoRef = useRef(null);
+  const porteMonnaieVideoRef = useRef(null);
   const catalogSectionRef = useRef(null);
   const gridRef = useRef(null);
   const isFirstFilterRender = useRef(true);
 
-  // Three-Video Sequential Animation Showcase: SAC (sacc.mp4) -> CHAUSSURE (chaussure.mp4) -> MONTRE (montre.mp4)
+  // Sequential Animation Showcase: SAC (sacc.mp4) -> CHAUSSURE (chaussure.mp4) -> MONTRE (montre.mp4) -> PORTE-MONNAIE (porte-monnaie.mp4)
   const showcaseProducts = useMemo(() => {
     const sacc = PRODUCTS.find((p) => p.id === 'art-3');
     const chaussure = PRODUCTS.find((p) => p.id === 'art-7');
     const montre = PRODUCTS.find((p) => p.id === 'art-6');
-    return [sacc, chaussure, montre].filter(Boolean);
+    const porteMonnaie = PRODUCTS.find((p) => p.id === 'art-2');
+    return [sacc, chaussure, montre, porteMonnaie].filter(Boolean);
   }, []);
 
   const [currentShowcaseIdx, setCurrentShowcaseIdx] = useState(0);
   const activeShowcase = showcaseProducts[currentShowcaseIdx] || showcaseProducts[0];
   const isTransitioningRef = useRef(false);
 
-  // Reliable transition triggers: SAC (0) -> CHAUSSURE (1) -> MONTRE (2) -> SAC (0)
+  // Reliable transition triggers: SAC (0) -> CHAUSSURE (1) -> MONTRE (2) -> PORTE-MONNAIE (3) -> SAC (0)
   const handleSaccEnded = () => {
     if (isTransitioningRef.current || currentShowcaseIdx !== 0) return;
     isTransitioningRef.current = true;
@@ -60,6 +62,15 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
 
   const handleMontreEnded = () => {
     if (isTransitioningRef.current || currentShowcaseIdx !== 2) return;
+    isTransitioningRef.current = true;
+    setCurrentShowcaseIdx(3);
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+    }, 300);
+  };
+
+  const handlePorteMonnaieEnded = () => {
+    if (isTransitioningRef.current || currentShowcaseIdx !== 3) return;
     isTransitioningRef.current = true;
     setCurrentShowcaseIdx(0);
     setTimeout(() => {
@@ -88,51 +99,33 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
     }
   };
 
-  // Synchronize playback: strictly play only the active video, pause and reset the other two
-  useEffect(() => {
-    if (currentShowcaseIdx === 0) {
-      if (chaussureVideoRef.current) {
-        chaussureVideoRef.current.pause();
-        chaussureVideoRef.current.currentTime = 0;
-      }
-      if (montreVideoRef.current) {
-        montreVideoRef.current.pause();
-        montreVideoRef.current.currentTime = 0;
-      }
-      if (saccVideoRef.current) {
-        saccVideoRef.current.currentTime = 0;
-        saccVideoRef.current.playbackRate = 1.0;
-        saccVideoRef.current.play().catch(() => {});
-      }
-    } else if (currentShowcaseIdx === 1) {
-      if (saccVideoRef.current) {
-        saccVideoRef.current.pause();
-        saccVideoRef.current.currentTime = 0;
-      }
-      if (montreVideoRef.current) {
-        montreVideoRef.current.pause();
-        montreVideoRef.current.currentTime = 0;
-      }
-      if (chaussureVideoRef.current) {
-        chaussureVideoRef.current.currentTime = 0;
-        chaussureVideoRef.current.playbackRate = 1.0;
-        chaussureVideoRef.current.play().catch(() => {});
-      }
-    } else {
-      if (saccVideoRef.current) {
-        saccVideoRef.current.pause();
-        saccVideoRef.current.currentTime = 0;
-      }
-      if (chaussureVideoRef.current) {
-        chaussureVideoRef.current.pause();
-        chaussureVideoRef.current.currentTime = 0;
-      }
-      if (montreVideoRef.current) {
-        montreVideoRef.current.currentTime = 0;
-        montreVideoRef.current.playbackRate = 1.0;
-        montreVideoRef.current.play().catch(() => {});
-      }
+  const handlePorteMonnaieTimeUpdate = (e) => {
+    const v = e.currentTarget;
+    if (v.duration && v.currentTime >= v.duration - 0.05) {
+      handlePorteMonnaieEnded();
     }
+  };
+
+  // Synchronize playback: strictly play only the active video, pause and reset the other three
+  useEffect(() => {
+    const videos = [
+      saccVideoRef.current,
+      chaussureVideoRef.current,
+      montreVideoRef.current,
+      porteMonnaieVideoRef.current
+    ];
+
+    videos.forEach((v, idx) => {
+      if (!v) return;
+      if (idx === currentShowcaseIdx) {
+        v.currentTime = 0;
+        v.playbackRate = 1.0;
+        v.play().catch(() => {});
+      } else {
+        v.pause();
+        v.currentTime = 0;
+      }
+    });
   }, [currentShowcaseIdx]);
 
   // Catalog Filter & Search States (Inspired by Screenshot 1: Product Display)
@@ -416,6 +409,21 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
                     onTimeUpdate={handleMontreTimeUpdate}
                     className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300 ease-in-out ${
                       currentShowcaseIdx === 2 ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    }`}
+                  />
+
+                  {/* Video 4: PORTE-MONNAIE (porte-monnaie.mp4) - Plays complete rotation fourth */}
+                  <video
+                    ref={porteMonnaieVideoRef}
+                    src="/videos/porte-monnaie.mp4"
+                    muted
+                    playsInline
+                    preload="auto"
+                    aria-label="Animation Porte-Monnaie VIRIL"
+                    onEnded={handlePorteMonnaieEnded}
+                    onTimeUpdate={handlePorteMonnaieTimeUpdate}
+                    className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300 ease-in-out ${
+                      currentShowcaseIdx === 3 ? 'opacity-100 z-10' : 'opacity-0 z-0'
                     }`}
                   />
                 </div>
