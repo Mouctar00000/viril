@@ -90,20 +90,35 @@ function smootherstep(t) {
 }
 
 /**
- * Draws an image into canvas with object-cover aspect ratio, perfectly centered
+ * Draws an image into canvas:
+ * - On Mobile (isMobile = true): uses object-cover (Math.max) so the animation fills the vertical mobile viewport cleanly (100% untouched).
+ * - On Desktop / PC (isMobile = false): uses object-contain (Math.min) so the character, jacket, and outfit fit naturally and elegantly in the center without excessive scaling, cropping, or overflow.
  */
-function drawImageCover(ctx, img, canvasWidth, canvasHeight) {
+function drawImageCover(ctx, img, canvasWidth, canvasHeight, isMobile = false) {
   if (!img || !img.complete || img.naturalWidth === 0) return;
   const iw = img.naturalWidth;
   const ih = img.naturalHeight;
   const hRatio = canvasWidth / iw;
   const vRatio = canvasHeight / ih;
-  const ratio = Math.max(hRatio, vRatio);
-  const nw = iw * ratio;
-  const nh = ih * ratio;
-  const cx = (canvasWidth - nw) * 0.5;
-  const cy = (canvasHeight - nh) * 0.5;
-  ctx.drawImage(img, cx, cy, nw, nh);
+
+  if (isMobile) {
+    // 100% UNCHANGED mobile behavior: object-cover
+    const ratio = Math.max(hRatio, vRatio);
+    const nw = iw * ratio;
+    const nh = ih * ratio;
+    const cx = (canvasWidth - nw) * 0.5;
+    const cy = (canvasHeight - nh) * 0.5;
+    ctx.drawImage(img, cx, cy, nw, nh);
+  } else {
+    // Desktop / PC restored original balanced appearance: object-contain
+    const ratio = Math.min(hRatio, vRatio);
+    const nw = iw * ratio;
+    const nh = ih * ratio;
+    const cx = (canvasWidth - nw) * 0.5;
+    const cy = (canvasHeight - nh) * 0.5;
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.drawImage(img, cx, cy, nw, nh);
+  }
 }
 
 export default function Hero() {
@@ -250,7 +265,7 @@ export default function Hero() {
             }
 
             if (img && img.complete && img.naturalWidth > 0) {
-              drawImageCover(ctx, img, canvas.width, canvas.height);
+              drawImageCover(ctx, img, canvas.width, canvas.height, isMobileRef.current);
               lastDrawnIndexRef.current = targetIndex;
             }
           }
@@ -478,7 +493,7 @@ export default function Hero() {
             ref={cleanFrameRef}
             src="/images/hero-frame0-master.png"
             alt="VIRIL Upper Outfit Opening Frame"
-            className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none transition-none"
+            className="absolute inset-0 w-full h-full object-cover md:object-contain object-center select-none pointer-events-none transition-none"
             style={{ opacity: 1, zIndex: 12 }}
           />
 
