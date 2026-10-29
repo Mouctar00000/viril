@@ -536,6 +536,19 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
     };
   }, []);
 
+  // Continuous auto-advance safety coordinator:
+  // Guarantees the product animation sequence (SAC -> Chaussure -> Montre -> Porte-monnaie)
+  // NEVER freezes or stalls, even under mobile autoplay restrictions or network throttling
+  useEffect(() => {
+    const safetyTimer = setTimeout(() => {
+      transitionToShowcase((currentShowcaseIdx + 1) % showcaseProducts.length);
+    }, 6500);
+
+    return () => {
+      clearTimeout(safetyTimer);
+    };
+  }, [currentShowcaseIdx, transitionToShowcase, showcaseProducts.length]);
+
   // Catalog Filter & Search States
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');

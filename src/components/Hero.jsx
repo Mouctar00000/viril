@@ -14,7 +14,7 @@ const FRAME_BASE_URL = '/images/hero-frames/frame_';
  * - start / end: animation progress range (0.00 to 1.00)
  * - side: 'left' or 'right' (alternating presentation)
  */
-export const HERO_DYNAMIC_MESSAGES = [
+const HERO_DYNAMIC_MESSAGES = [
   {
     id: 'msg-1',
     start: 0.08,
@@ -231,6 +231,13 @@ export default function Hero() {
         canvas.width = w;
         canvas.height = h;
         needsResizeRedrawRef.current = true;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const fallbackImg = framesRef.current[lastDrawnIndexRef.current] || framesRef.current[0];
+          if (fallbackImg && fallbackImg.complete && fallbackImg.naturalWidth > 0) {
+            drawImageCover(ctx, fallbackImg, w, h, window.innerWidth < 768);
+          }
+        }
       }
       const isMobile = window.innerWidth < 768;
       isMobileRef.current = isMobile;
@@ -294,14 +301,24 @@ export default function Hero() {
             // If exact frame isn't loaded yet, find nearest available loaded frame
             if (!img || !img.complete || img.naturalWidth === 0) {
               for (let d = 1; d < TOTAL_FRAMES; d++) {
-                if (targetIndex - d >= 0 && framesRef.current[targetIndex - d]?.complete) {
-                  img = framesRef.current[targetIndex - d];
+                const prev = targetIndex - d >= 0 ? framesRef.current[targetIndex - d] : null;
+                if (prev && prev.complete && prev.naturalWidth > 0) {
+                  img = prev;
                   break;
                 }
-                if (targetIndex + d < TOTAL_FRAMES && framesRef.current[targetIndex + d]?.complete) {
-                  img = framesRef.current[targetIndex + d];
+                const next = targetIndex + d < TOTAL_FRAMES ? framesRef.current[targetIndex + d] : null;
+                if (next && next.complete && next.naturalWidth > 0) {
+                  img = next;
                   break;
                 }
+              }
+            }
+
+            // Absolute fallback: if still no valid frame, fall back to frame 0 (guarantees zero black screen)
+            if (!img || !img.complete || img.naturalWidth === 0) {
+              const frame0 = framesRef.current[0];
+              if (frame0 && frame0.complete && frame0.naturalWidth > 0) {
+                img = frame0;
               }
             }
 
@@ -466,7 +483,7 @@ export default function Hero() {
           end: `+=${scrollDistance}`,
           pin: pinTargetRef.current,
           pinSpacing: true,
-          scrub: 0.45,
+          scrub: isMobile ? 0.15 : 0.35,
           onUpdate: () => {
             baseProgressRef.current = progressProxy.value;
           },
@@ -529,11 +546,11 @@ export default function Hero() {
             style={{ opacity: isReady ? 1 : 0.85 }}
           />
 
-          {/* Master Opening Frame: Jacket/Blazer preserved, Pants & Shoes completely removed */}
+          {/* Master Opening Frame: 100% matched with frame 1 for seamless instant display */}
           <img
             ref={cleanFrameRef}
-            src="/images/hero-frame0-master.png"
-            alt="VIRIL Upper Outfit Opening Frame"
+            src="/images/hero-frames/frame_001.webp"
+            alt="VIRIL Animation Opening Frame"
             className="absolute inset-0 w-full h-full object-cover md:object-contain object-center select-none pointer-events-none transition-none"
             style={{ opacity: 1, zIndex: 12 }}
           />

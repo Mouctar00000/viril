@@ -78,6 +78,7 @@ export default function CartDrawer({ onOpenCheckoutModal }) {
               <span className="text-xs text-[#5E6479]">Découvrez nos e-books et accessoires.</span>
             </div>
           ) : (
+            cart.map((item) => (
               <div
                 key={item.cartKey || item.id}
                 className="grid grid-cols-[68px_1fr_auto] gap-3.5 py-4 border-b border-white/10 items-center animate-fade-in"
@@ -157,6 +158,7 @@ export default function CartDrawer({ onOpenCheckoutModal }) {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
+            ))
           )}
         </div>
 
