@@ -90,45 +90,64 @@ function smootherstep(t) {
 }
 
 /**
+ * Calculates responsive geometry (nw, nh, cx, cy) in target coordinate space
+ * - width, height: dimensions of container (physical px for canvas, CSS px for cleanImg)
+ * - isMobile: boolean (window.innerWidth < 768)
+ * - dpr: device pixel ratio (1 when calculating for CSS px, dpr when for canvas)
+ */
+function getHeroFrameGeometry(width, height, isMobile, dpr = 1) {
+  const iw = 1280;
+  const ih = 720;
+
+  if (isMobile) {
+    // Mobile responsive framing:
+    // Guarantees full body (head at y=20, shoe soles at y=719) is 100% visible
+    // with 10px breathing room under header and 36px clearance above bottom edge
+    const topMargin = 10 * dpr;
+    const bottomMargin = 36 * dpr;
+    const targetCharH = height - topMargin - bottomMargin;
+    let ratio = targetCharH / 700.0;
+
+    // Guard: don't let character scale excessively wide on wider mobile viewports
+    const maxRatioCenter = (width * 0.85) / 320.0;
+    ratio = Math.min(ratio, maxRatioCenter);
+
+    const nw = iw * ratio;
+    const nh = ih * ratio;
+    const cx = (width - nw) * 0.5;
+    const cy = topMargin - 20 * ratio;
+
+    return { nw, nh, cx, cy };
+  } else {
+    // Desktop / Tablet:
+    // Balanced containment with 16px top margin and 48px bottom clearance
+    const topMargin = 16 * dpr;
+    const bottomMargin = 48 * dpr;
+    const ratioH = (height - topMargin - bottomMargin) / 720.0;
+    const ratioW = width / 1280.0;
+    const ratio = Math.min(ratioW, ratioH);
+
+    const nw = iw * ratio;
+    const nh = ih * ratio;
+    const cx = (width - nw) * 0.5;
+    const cy = topMargin + (height - topMargin - bottomMargin - nh) * 0.5;
+
+    return { nw, nh, cx, cy };
+  }
+}
+
+/**
  * Draws an image into canvas:
- * - On Mobile (isMobile = true): accurately scaled and framed to keep the entire character body,
- *   including both legs and both shoes, 100% visible throughout all animation phases (standing and walking),
- *   clearing the canvas and keeping a safe 48px clearance above the bottom edge.
- * - On Desktop / PC (isMobile = false): uses object-contain (Math.min) so the character, jacket, and outfit
- *   fit naturally and elegantly in the center without excessive scaling, cropping, or overflow (100% untouched).
+ * Uses unified responsive geometry so character head and shoes remain 100% visible
+ * throughout all animation phases (standing, zooming, and walking forward).
  */
 function drawImageCover(ctx, img, canvasWidth, canvasHeight, isMobile = false) {
   if (!img || !img.complete || img.naturalWidth === 0) return;
-  const iw = img.naturalWidth;
-  const ih = img.naturalHeight;
-  const hRatio = canvasWidth / iw;
-  const vRatio = canvasHeight / ih;
+  const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+  const { nw, nh, cx, cy } = getHeroFrameGeometry(canvasWidth, canvasHeight, isMobile, dpr);
 
-  if (isMobile) {
-    const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1;
-    // Mobile responsive scaling: framed to keep full body and both shoes fully visible
-    const maxScaleByWidth = (canvasWidth * 0.78) / (320 * vRatio);
-    const mobileScale = Math.min(0.88, Math.max(0.72, maxScaleByWidth));
-    const ratio = vRatio * mobileScale;
-    const nw = iw * ratio;
-    const nh = ih * ratio;
-    const cx = (canvasWidth - nw) * 0.5;
-    // Start flush with the top of the container (cy = 0) to eliminate any black gap above the video,
-    // while keeping both shoes comfortably visible above the bottom edge
-    const cy = 0;
-
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.drawImage(img, cx, cy, nw, nh);
-  } else {
-    // Desktop / PC restored original balanced appearance: object-contain flush with top
-    const ratio = Math.min(hRatio, vRatio);
-    const nw = iw * ratio;
-    const nh = ih * ratio;
-    const cx = (canvasWidth - nw) * 0.5;
-    const cy = 0;
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.drawImage(img, cx, cy, nw, nh);
-  }
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  ctx.drawImage(img, cx, cy, nw, nh);
 }
 
 export default function Hero() {
@@ -171,9 +190,15 @@ export default function Hero() {
       setIsReady(true);
       const canvas = canvasRef.current;
       if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          canvas.width = Math.round(rect.width * dpr);
+          canvas.height = Math.round(rect.height * dpr);
+        }
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          drawImageCover(ctx, img0, canvas.width, canvas.height, isMobileRef.current);
+          drawImageCover(ctx, img0, canvas.width, canvas.height, window.innerWidth < 768);
           lastDrawnIndexRef.current = 0;
         }
       }
@@ -226,50 +251,37 @@ export default function Hero() {
       const w = Math.round(rect.width * dpr);
       const h = Math.round(rect.height * dpr);
       // Only resize canvas if width changed or height changed significantly (> 70px)
-      // to avoid canvas clears during mobile URL bar movements
-      if (canvas.width !== w || Math.abs(canvas.height - h) > 70) {
+      if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
         needsResizeRedrawRef.current = true;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          const fallbackImg = framesRef.current[lastDrawnIndexRef.current] || framesRef.current[0];
-          if (fallbackImg && fallbackImg.complete && fallbackImg.naturalWidth > 0) {
-            drawImageCover(ctx, fallbackImg, w, h, window.innerWidth < 768);
-          }
-        }
       }
       const isMobile = window.innerWidth < 768;
       isMobileRef.current = isMobile;
 
-      // Align opening master frame with canvas on mobile
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const fallbackImg = framesRef.current[lastDrawnIndexRef.current] || framesRef.current[0];
+        if (fallbackImg && fallbackImg.complete && fallbackImg.naturalWidth > 0) {
+          drawImageCover(ctx, fallbackImg, w, h, isMobile);
+        }
+      }
+
+      // Align opening master frame with canvas 1:1 on both mobile and desktop
       const cleanImg = cleanFrameRef.current;
       if (cleanImg) {
-        if (isMobile) {
-          const vRatio = h / 720;
-          const maxScaleByWidth = (w * 0.78) / (320 * vRatio);
-          const mobileScale = Math.min(0.88, Math.max(0.72, maxScaleByWidth));
-          const ratio = vRatio * mobileScale;
-          const nw = 1280 * ratio;
-          const nh = 720 * ratio;
-          const cx = (w - nw) * 0.5;
+        const cssW = rect.width;
+        const cssH = rect.height;
+        const { nw, nh, cx, cy } = getHeroFrameGeometry(cssW, cssH, isMobile, 1);
 
-          cleanImg.style.width = `${nw / dpr}px`;
-          cleanImg.style.height = `${nh / dpr}px`;
-          cleanImg.style.left = `${cx / dpr}px`;
-          cleanImg.style.top = '0px';
-          cleanImg.style.right = 'auto';
-          cleanImg.style.bottom = 'auto';
-          cleanImg.style.objectFit = 'contain';
-        } else {
-          cleanImg.style.width = '';
-          cleanImg.style.height = '';
-          cleanImg.style.left = '';
-          cleanImg.style.top = '';
-          cleanImg.style.right = '';
-          cleanImg.style.bottom = '';
-          cleanImg.style.objectFit = '';
-        }
+        cleanImg.style.position = 'absolute';
+        cleanImg.style.width = `${nw}px`;
+        cleanImg.style.height = `${nh}px`;
+        cleanImg.style.left = `${cx}px`;
+        cleanImg.style.top = `${cy}px`;
+        cleanImg.style.right = 'auto';
+        cleanImg.style.bottom = 'auto';
+        cleanImg.style.objectFit = 'contain';
       }
     };
 
@@ -542,7 +554,7 @@ export default function Hero() {
         <div className="absolute top-[62px] sm:top-[70px] left-0 right-0 bottom-0 w-full h-[calc(100dvh-62px)] sm:h-[calc(100dvh-70px)] overflow-hidden z-10 pointer-events-none">
           <canvas
             ref={canvasRef}
-            className="w-full h-full object-cover object-center select-none pointer-events-none transition-opacity duration-500"
+            className="block w-full h-full select-none pointer-events-none transition-opacity duration-500"
             style={{ opacity: isReady ? 1 : 0.85 }}
           />
 
@@ -551,12 +563,12 @@ export default function Hero() {
             ref={cleanFrameRef}
             src="/images/hero-frames/frame_001.webp"
             alt="VIRIL Animation Opening Frame"
-            className="absolute inset-0 w-full h-full object-cover md:object-contain object-center select-none pointer-events-none transition-none"
+            className="absolute select-none pointer-events-none transition-none"
             style={{ opacity: 1, zIndex: 12 }}
           />
 
           {/* Seamless bottom gradient fade to transition cleanly into the next section */}
-          <div className="absolute inset-x-0 bottom-0 h-10 sm:h-44 bg-gradient-to-t from-[#04050A] via-[#04050A]/40 to-transparent pointer-events-none z-15" />
+          <div className="absolute inset-x-0 bottom-0 h-6 sm:h-8 bg-gradient-to-t from-[#04050A] via-[#04050A]/20 to-transparent pointer-events-none z-15" />
 
           {/* Subtle perimeter vignette for cinematic depth */}
           <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(4,5,10,0.5)] sm:shadow-[inset_0_0_120px_rgba(4,5,10,0.65)] pointer-events-none z-15" />
