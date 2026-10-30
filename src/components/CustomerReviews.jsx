@@ -657,16 +657,26 @@ export default function CustomerReviews() {
               Explorez l'intégralité de nos pièces en cuir de crocodile, gardes-temps squelettes et bijoux masculins haute joaillerie.
             </p>
 
-            {/* Official VOIR LA COLLECTION Button */}
-            <div>
+            {/* Action Buttons: Discover the Collection & Discover Our E-books (Requirement 5) */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4 pt-2">
               <button
                 type="button"
-                id="btn-voir-la-collection-bottom"
+                id="btn-decouvrir-la-collection-bottom"
                 onClick={() => unlockNav('boutique')}
-                className="btn-main btn--solid btn-light-sweep text-xs sm:text-sm tracking-[0.2em] uppercase font-bold py-4 sm:py-5 px-8 sm:px-14 cursor-pointer inline-flex items-center gap-3.5 shadow-[0_0_35px_rgba(209,185,146,0.45)] hover:scale-105 transition-all duration-300 group"
+                className="btn-main btn--solid btn-light-sweep text-xs sm:text-sm tracking-[0.18em] uppercase font-bold py-4 sm:py-4.5 px-8 sm:px-12 cursor-pointer inline-flex items-center justify-center gap-3 shadow-[0_0_35px_rgba(209,185,146,0.45)] hover:scale-105 transition-all duration-300 group w-full sm:w-auto"
               >
-                <span>VOIR LA COLLECTION</span>
+                <span>Découvrir la collection</span>
                 <ArrowRight className="w-4 h-4 text-black group-hover:translate-x-1.5 transition-transform duration-300" />
+              </button>
+
+              <button
+                type="button"
+                id="btn-decouvrir-nos-ebooks-bottom"
+                onClick={() => unlockNav('ebooks')}
+                className="btn-main btn--line text-xs sm:text-sm tracking-[0.18em] uppercase font-semibold py-4 sm:py-4.5 px-7 sm:px-10 cursor-pointer inline-flex items-center justify-center gap-3 hover:border-[#D1B992] hover:text-[#D1B992] transition-all duration-300 group w-full sm:w-auto"
+              >
+                <span>Découvrir nos E-books</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1.5 transition-transform duration-300" />
               </button>
             </div>
 

@@ -163,13 +163,29 @@ export default function ProductCustomizerModal({ product, isOpen, onClose }) {
                     controls={false}
                     disablePictureInPicture
                     disableRemotePlayback
-                    className="relative z-10 w-full h-full object-cover rounded-xl filter drop-shadow-[0_20px_35px_rgba(0,0,0,0.85)] transition-transform duration-500 hover:scale-105"
+                    className={`relative z-10 w-full h-full object-cover rounded-xl filter drop-shadow-[0_20px_35px_rgba(0,0,0,0.85)] transition-transform duration-500 ${
+                      activeView === 'macro'
+                        ? 'scale-125'
+                        : activeView === 'interieur'
+                        ? 'scale-105'
+                        : activeView === 'dos'
+                        ? 'scale-100 rotate-1'
+                        : 'scale-100'
+                    }`}
                   />
                 ) : (
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="relative z-10 w-full h-full object-contain filter drop-shadow-[0_20px_35px_rgba(0,0,0,0.85)] transition-transform duration-500 hover:scale-105"
+                    className={`relative z-10 w-full h-full object-contain filter drop-shadow-[0_20px_35px_rgba(0,0,0,0.85)] transition-transform duration-500 ${
+                      activeView === 'macro'
+                        ? 'scale-125'
+                        : activeView === 'interieur'
+                        ? 'scale-105'
+                        : activeView === 'dos'
+                        ? 'scale-100 rotate-1'
+                        : 'scale-100'
+                    }`}
                   />
                 )}
 
@@ -197,41 +213,30 @@ export default function ProductCustomizerModal({ product, isOpen, onClose }) {
                 </div>
               </div>
 
-              {/* View Angles Selector (Depan / Belakang / Finitions - Inspired by Screenshot 2) */}
-              <div className="flex items-center justify-center gap-2 mt-4 w-full">
-                <button
-                  type="button"
-                  onClick={() => setActiveView('face')}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-[11px] font-sans uppercase tracking-wider transition-all cursor-pointer ${
-                    activeView === 'face'
-                      ? 'border-[#D1B992] bg-[#D1B992]/10 text-[#D1B992]'
-                      : 'border-white/10 bg-white/[0.02] text-[#9AA0B4] hover:border-white/20'
-                  }`}
-                >
-                  Vue Face
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveView('dos')}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-[11px] font-sans uppercase tracking-wider transition-all cursor-pointer ${
-                    activeView === 'dos'
-                      ? 'border-[#D1B992] bg-[#D1B992]/10 text-[#D1B992]'
-                      : 'border-white/10 bg-white/[0.02] text-[#9AA0B4] hover:border-white/20'
-                  }`}
-                >
-                  Vue Dos / Intérieur
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveView('macro')}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-[11px] font-sans uppercase tracking-wider transition-all cursor-pointer ${
-                    activeView === 'macro'
-                      ? 'border-[#D1B992] bg-[#D1B992]/10 text-[#D1B992]'
-                      : 'border-white/10 bg-white/[0.02] text-[#9AA0B4] hover:border-white/20'
-                  }`}
-                >
-                  Détail Macro
-                </button>
+              {/* View Angles Selector — 4 Identical Dimension Buttons (Mobile & Desktop) */}
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mt-4 w-full">
+                {[
+                  { id: 'face', label: 'Vue Face' },
+                  { id: 'dos', label: 'Vue Dos' },
+                  { id: 'interieur', label: 'Vue Intérieur' },
+                  { id: 'macro', label: 'Détail Macro' }
+                ].map((opt) => {
+                  const isActive = activeView === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setActiveView(opt.id)}
+                      className={`h-10 sm:h-11 px-0.5 sm:px-2 rounded-xl border text-[8.5px] xs:text-[9.5px] sm:text-xs font-sans font-medium uppercase tracking-tight xs:tracking-normal sm:tracking-wider transition-all cursor-pointer flex items-center justify-center text-center leading-tight ${
+                        isActive
+                          ? 'border-[#D1B992] bg-[#D1B992]/15 text-[#D1B992] shadow-[0_0_12px_rgba(209,185,146,0.3)]'
+                          : 'border-white/10 bg-white/[0.02] text-[#9AA0B4] hover:border-white/25 hover:text-white'
+                      }`}
+                    >
+                      <span className="leading-none">{opt.label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Trust Badges */}
@@ -463,26 +468,28 @@ export default function ProductCustomizerModal({ product, isOpen, onClose }) {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="space-y-3 pt-2">
+              {/* Minimalist, Compact Action Buttons (Single-Line, Reduced Height & Padding) */}
+              <div className="space-y-2 pt-2">
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="w-full py-4 rounded-full bg-[#D1B992] text-[#04050A] font-semibold text-xs uppercase tracking-widest hover:bg-[#DFCAA0] hover:shadow-[0_0_25px_rgba(209,185,146,0.5)] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full h-10 sm:h-11 px-4 rounded-xl bg-[#D1B992] text-[#04050A] font-semibold text-xs sm:text-[13px] uppercase tracking-wider hover:bg-[#DFCAA0] hover:shadow-[0_0_20px_rgba(209,185,146,0.4)] transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap overflow-hidden"
                 >
-                  <ShoppingBag className="w-4 h-4" />
-                  <span>
-                    {isAddedSuccess ? 'Ajouté avec succès !' : 'Ajouter au panier avec cette configuration'}
+                  <ShoppingBag className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">
+                    {isAddedSuccess ? 'Ajouté au panier !' : 'Ajouter au panier'}
                   </span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleOrderWhatsApp}
-                  className="w-full py-3.5 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-black transition-all text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full h-10 sm:h-11 px-4 rounded-xl border border-[#25D366]/40 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-black transition-all text-xs sm:text-[13px] font-semibold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap overflow-hidden"
                 >
-                  <PhoneCall className="w-4 h-4" />
-                  <span>Finaliser immédiatement via Concierge WhatsApp</span>
+                  <svg className="w-4 h-4 flex-shrink-0 fill-current" viewBox="0 0 24 24">
+                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19.01L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.36 7.03 9.08 7.09 8.84 7.35C8.6 7.61 7.92 8.25 7.92 9.54C7.92 10.84 8.87 12.09 9 12.27C9.14 12.44 10.83 15.06 13.43 16.18C15.6 17.11 16.04 16.93 16.51 16.88C16.98 16.84 18.03 16.26 18.25 15.63C18.47 15 18.47 14.47 18.4 14.36C18.34 14.25 18.17 14.19 17.91 14.06C17.65 13.93 16.39 13.31 16.15 13.22C15.92 13.14 15.75 13.09 15.58 13.35C15.41 13.61 14.93 14.19 14.78 14.36C14.63 14.53 14.48 14.56 14.22 14.43C13.96 14.3 12.87 13.94 11.58 12.79C10.58 11.9 9.9 10.8 9.77 10.58C9.64 10.36 9.76 10.24 9.89 10.11C10 9.99 10.16 9.78 10.29 9.63C10.42 9.48 10.46 9.37 10.55 9.2C10.64 9.03 10.59 8.88 10.53 8.75C10.47 8.62 9.99 7.46 9.79 6.99C9.6 6.53 9.4 6.59 9.25 6.58C9.11 6.58 8.94 6.58 8.77 6.58L9.53 7.03Z" />
+                  </svg>
+                  <span className="truncate">Commander via WhatsApp</span>
                 </button>
               </div>
 

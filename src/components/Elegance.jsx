@@ -261,7 +261,7 @@ function AppleProductCard({
  */
 function EditorialIntroCard({ onExploreAll }) {
   return (
-    <article className="catalog-product-card min-w-[280px] xs:min-w-[310px] sm:min-w-[330px] md:min-w-[350px] max-w-[360px] snap-start flex-shrink-0 flex flex-col justify-between rounded-[2rem] border border-[#D1B992]/35 bg-gradient-to-b from-[#151929] via-[#0B0D18] to-[#04050A] p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.7)] group relative overflow-hidden">
+    <article className="hidden sm:flex catalog-product-card min-w-[280px] xs:min-w-[310px] sm:min-w-[330px] md:min-w-[350px] max-w-[360px] snap-start flex-shrink-0 flex-col justify-between rounded-[2rem] border border-[#D1B992]/35 bg-gradient-to-b from-[#151929] via-[#0B0D18] to-[#04050A] p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.7)] group relative overflow-hidden">
       {/* Ambient background glow */}
       <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[#D1B992]/15 filter blur-3xl pointer-events-none group-hover:bg-[#D1B992]/25 transition-all duration-700" />
       <div className="absolute -bottom-20 -left-20 w-44 h-44 rounded-full bg-[#162842]/30 filter blur-3xl pointer-events-none" />
@@ -470,7 +470,7 @@ function ProductShelf({
 }
 
 export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
-  const { addToCart, formatMoney, toggleFavorite, isFavorite, unlockNav } = useCart();
+  const { addToCart, formatMoney, toggleFavorite, isFavorite, unlockNav, displayLayout, setDisplayLayout } = useCart();
   const saccVideoRef = useRef(null);
   const chaussureVideoRef = useRef(null);
   const montreVideoRef = useRef(null);
@@ -597,8 +597,7 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
     });
   }, [selectedCategory, searchQuery]);
 
-  // Browse Mode: 'shelves' (Apple-inspired horizontal carousels stacked vertically) or 'grid' (all items in spacious grid)
-  const [browseMode, setBrowseMode] = useState('shelves');
+  // Shared Browse Mode: displayLayout from CartContext ('grid' = 2 colonnes par défaut, 'single' = 1 colonne)
 
   // Curated Apple-Style Shelves
   const shelfCoupsDeCoeur = useMemo(() => {
@@ -1071,33 +1070,35 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
               <span>Disponible de suite</span>
             </button>
 
-            {/* View Mode Switcher: Apple Shelves vs Panoramic Grid */}
+            {/* View Mode Switcher: Option B (Two-column grid, first & default) vs Option A (Single-column layout) */}
             <div className="flex items-center p-1 rounded-2xl border border-white/10 bg-[#0A0C16] flex-shrink-0">
               <button
                 type="button"
-                onClick={() => setBrowseMode('shelves')}
+                onClick={() => setDisplayLayout('grid')}
                 className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-sans flex items-center gap-1.5 transition-all cursor-pointer ${
-                  browseMode === 'shelves'
+                  displayLayout === 'grid'
                     ? 'bg-[#D1B992] text-[#04050A] font-semibold shadow-md'
                     : 'text-[#9AA0B4] hover:text-white'
                 }`}
-                title="Parcours par rayons défilants (Style Apple)"
-              >
-                <Layers className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">Rayons</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setBrowseMode('grid')}
-                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-sans flex items-center gap-1.5 transition-all cursor-pointer ${
-                  browseMode === 'grid'
-                    ? 'bg-[#D1B992] text-[#04050A] font-semibold shadow-md'
-                    : 'text-[#9AA0B4] hover:text-white'
-                }`}
-                title="Vue grille 2x2"
+                title="Grille 2 colonnes (par défaut)"
+                aria-label="Affichage 2 produits par ligne"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
                 <span className="hidden xs:inline">Grille</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDisplayLayout('single')}
+                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-sans flex items-center gap-1.5 transition-all cursor-pointer ${
+                  displayLayout === 'single'
+                    ? 'bg-[#D1B992] text-[#04050A] font-semibold shadow-md'
+                    : 'text-[#9AA0B4] hover:text-white'
+                }`}
+                title="1 produit par ligne"
+                aria-label="Affichage 1 produit par ligne"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span className="hidden xs:inline">Ligne</span>
               </button>
             </div>
           </div>
@@ -1142,63 +1143,12 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
               Réinitialiser les filtres
             </button>
           </div>
-        ) : !isFiltered && browseMode === 'shelves' ? (
-          /* ============================================================ */
-          /* APPLE-INSPIRED PRODUCT BROWSING EXPERIENCE (CURATED SHELVES) */
-          /* ============================================================ */
-          <div className="space-y-16 sm:space-y-20">
-            {/* Shelf 1: Coups de Cœur & Nouveautés with Editorial Intro Card */}
-            <ProductShelf
-              eyebrow="SÉLECTION EMBLÉMATIQUE"
-              title="Vos Nouveaux"
-              highlightWord="Coups de Cœur"
-              subtitle="Des accessoires de caractère taillés dans des cuirs précieux, métaux polis et textures d'exception."
-              introCard={
-                <EditorialIntroCard onExploreAll={() => setBrowseMode('grid')} />
-              }
-              products={shelfCoupsDeCoeur}
-              formatMoney={formatMoney}
-              isFavorite={isFavorite}
-              toggleFavorite={toggleFavorite}
-              handleOpenConfigurator={handleOpenConfigurator}
-              addToCart={addToCart}
-            />
-
-            {/* Shelf 2: Haute Maroquinerie & Voyage */}
-            <ProductShelf
-              eyebrow="SAVOIR-FAIRE SELLIER & EXÉCUTIF"
-              title="Haute Maroquinerie &"
-              highlightWord="Voyage"
-              subtitle="Sacs de voyage grande contenance, pochettes de main et portefeuilles à blindage anti-RFID en cuirs italiens rares."
-              products={shelfMaroquinerie}
-              formatMoney={formatMoney}
-              isFavorite={isFavorite}
-              toggleFavorite={toggleFavorite}
-              handleOpenConfigurator={handleOpenConfigurator}
-              addToCart={addToCart}
-            />
-
-            {/* Shelf 3: Haute Horlogerie & Joyaux Masculins */}
-            <ProductShelf
-              eyebrow="PRÉCISION ET GÉOMÉTRIE INTEMPORELLE"
-              title="Haute Horlogerie &"
-              highlightWord="Joyaux d'Élite"
-              subtitle="L'élégance géométrique au poignet : cadrans rectangulaires biseautés, cuir vert sauge et acier 316L ionisé."
-              products={shelfHorlogerie}
-              formatMoney={formatMoney}
-              isFavorite={isFavorite}
-              toggleFavorite={toggleFavorite}
-              handleOpenConfigurator={handleOpenConfigurator}
-              addToCart={addToCart}
-            />
-          </div>
-        ) : browseMode === 'shelves' ? (
-          /* Filtered Apple-Style Shelf */
+        ) : displayLayout === 'single' ? (
+          /* Option A: One product per row, occupying almost the entire screen width */
           <div className="space-y-6">
             <div className="flex items-center justify-between text-xs text-[#9AA0B4] border-b border-white/5 pb-2">
               <span className="font-mono uppercase tracking-wider text-[#D1B992]">
-                {activeCategoryLabel} • {displayedProducts.length} création
-                {displayedProducts.length > 1 ? 's' : ''}
+                {activeCategoryLabel} • {displayedProducts.length} création{displayedProducts.length > 1 ? 's' : ''}
               </span>
               {isFiltered && (
                 <button
@@ -1215,26 +1165,30 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
               )}
             </div>
 
-            <ProductShelf
-              eyebrow="RÉSULTATS DE VOTRE SÉLECTION"
-              title="Créations"
-              highlightWord={activeCategoryLabel}
-              subtitle="Explorez les modèles correspondants à vos critères de style."
-              products={displayedProducts}
-              formatMoney={formatMoney}
-              isFavorite={isFavorite}
-              toggleFavorite={toggleFavorite}
-              handleOpenConfigurator={handleOpenConfigurator}
-              addToCart={addToCart}
-            />
+            <div
+              ref={gridRef}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-xl sm:max-w-none mx-auto"
+            >
+              {displayedProducts.map((product) => (
+                <AppleProductCard
+                  key={product.id}
+                  product={product}
+                  formatMoney={formatMoney}
+                  isFavorite={isFavorite}
+                  toggleFavorite={toggleFavorite}
+                  handleOpenConfigurator={handleOpenConfigurator}
+                  addToCart={addToCart}
+                  isGrid={false}
+                />
+              ))}
+            </div>
           </div>
         ) : (
-          /* Panoramic Grid View */
+          /* Option B: Two products side by side (2-column grid - FIRST & DEFAULT) */
           <div className="space-y-6">
             <div className="flex items-center justify-between text-xs text-[#9AA0B4] border-b border-white/5 pb-2">
               <span className="font-mono uppercase tracking-wider text-[#D1B992]">
-                {activeCategoryLabel} • {displayedProducts.length} création
-                {displayedProducts.length > 1 ? 's' : ''}
+                {activeCategoryLabel} • {displayedProducts.length} création{displayedProducts.length > 1 ? 's' : ''}
               </span>
               {isFiltered && (
                 <button

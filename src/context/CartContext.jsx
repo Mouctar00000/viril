@@ -24,17 +24,31 @@ export function CartProvider({ children }) {
     }
   });
 
+  // Shared display layout between physical and digital products ('grid' = 2 colonnes par défaut, 'single' = 1 colonne)
+  const [displayLayout, setDisplayLayout] = useState('grid');
+
   // Navigation stage: TOUJOURS 'initial' à chaque actualisation (F5 / Rafraîchir)
   const [navStage, setNavStage] = useState('initial');
 
   const unlockNav = (targetId = 'boutique') => {
+    if (targetId === 'accueil' || targetId === 'home') {
+      setNavStage('initial');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      try {
+        window.history.pushState({ stage: 'initial', section: 'accueil' }, '', window.location.pathname);
+      } catch {
+        window.location.hash = '';
+      }
+      return;
+    }
+
     setNavStage('unlocked');
 
     const scrollToTarget = () => {
       if (targetId === 'boutique' || targetId === 'top') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         try {
-          window.history.pushState(null, '', '#boutique');
+          window.history.pushState({ stage: 'unlocked', section: 'boutique' }, '', '#boutique');
         } catch {
           window.location.hash = '#boutique';
         }
@@ -45,7 +59,7 @@ export function CartProvider({ children }) {
       if (targetEl) {
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         try {
-          window.history.pushState(null, '', '#' + targetId);
+          window.history.pushState({ stage: 'unlocked', section: targetId }, '', '#' + targetId);
         } catch {
           window.location.hash = '#' + targetId;
         }
@@ -69,30 +83,48 @@ export function CartProvider({ children }) {
   };
 
   useEffect(() => {
-    // Réinitialisation stricte à l'accueil en haut de page à chaque chargement/actualisation
+    // 1. Réinitialisation stricte à l'accueil en haut de page à chaque chargement / actualisation (F5)
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
     if (window.location.hash) {
       try {
-        window.history.replaceState(null, '', window.location.pathname);
+        window.history.replaceState({ stage: 'initial' }, '', window.location.pathname);
       } catch {
         // ignore
       }
     }
     window.scrollTo(0, 0);
 
+    // 2. Comportement bouton Retour du navigateur mobile :
+    // Quand l'utilisateur navigue sur mobile et appuie sur le bouton Retour, redirection immédiate vers l'accueil
+    const handlePopState = () => {
+      setNavStage('initial');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      try {
+        window.history.replaceState({ stage: 'initial' }, '', window.location.pathname);
+      } catch {
+        // ignore
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
     const handleBeforeUnload = () => {
       if (window.location.hash) {
         try {
-          window.history.replaceState(null, '', window.location.pathname);
+          window.history.replaceState({ stage: 'initial' }, '', window.location.pathname);
         } catch {
           // ignore
         }
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -197,6 +229,8 @@ export function CartProvider({ children }) {
         navStage,
         setNavStage,
         unlockNav,
+        displayLayout,
+        setDisplayLayout,
       }}
     >
       {children}

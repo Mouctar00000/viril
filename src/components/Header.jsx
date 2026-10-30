@@ -8,10 +8,12 @@ export default function Header() {
   const [activeSection, setActiveSection] = useState('accueil');
   const { totalCount, setIsCartOpen, bump, favorites, navStage, unlockNav } = useCart();
 
-  // Navigation links are only displayed after the user unlocks the boutique (navStage === 'unlocked').
+  // Navigation links displayed when visitors enter the website's main navigation (Requirement 9)
+  // Exact 5 pages in this exact order: 1. Accueil, 2. Boutique, 3. E-books, 4. À propos, 5. Contact
   const fullNavLinks = [
+    { href: '#accueil', label: 'Accueil', id: 'accueil' },
     { href: '#boutique', label: 'Boutique', id: 'boutique' },
-    { href: '#ebooks', label: 'E-book', id: 'ebooks' },
+    { href: '#ebooks', label: 'E-books', id: 'ebooks' },
     { href: '#apropos', label: 'À propos', id: 'apropos' },
     { href: '#contact', label: 'Contact', id: 'contact' },
   ];
@@ -55,7 +57,14 @@ export default function Header() {
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 md:px-14 flex items-center justify-between gap-6">
           
           {/* Left: Official Brand Logo & Wordmark VIRIL ACCESSORIES */}
-          <a href="#accueil" className="flex items-center gap-3 group cursor-pointer flex-shrink-0">
+          <a
+            href="#accueil"
+            onClick={(e) => {
+              e.preventDefault();
+              unlockNav('accueil');
+            }}
+            className="flex items-center gap-3 group cursor-pointer flex-shrink-0"
+          >
             <img
               src="/images/logo-white.png"
               alt="VIRIL ACCESSORIES Logo"

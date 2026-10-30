@@ -54,7 +54,7 @@ export default function Welcome() {
             onClick={() => unlockNav('ebooks')}
             className="btn-main btn--line inline-flex items-center gap-3 text-xs tracking-[0.16em] uppercase py-4 px-8 cursor-pointer hover:border-[#D1B992] transition-colors"
           >
-            <span>Découvrez nos e-books</span>
+            <span>Découvrir nos E-books</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
