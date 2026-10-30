@@ -119,29 +119,23 @@ function getHeroFrameGeometry(width, height, isMobile, dpr = 1) {
 
     return { nw, nh, cx, cy };
   } else {
-    // Desktop / Tablet (Requirement 4):
-    // Move animation upward so it starts immediately below the thin horizontal line,
-    // eliminating empty space above the models while ensuring full body and both feet
-    // remain 100% visible throughout all animation phases (standing, zooming, and walking).
-    const bottomClearance = 28 * dpr;
-    const ratioH = (height - bottomClearance) / 705.0;
+    // Desktop / Tablet (Responsive Balanced Geometry):
+    // 1. Position the video downward with generous topMargin so the person's complete head
+    //    always has elegant breathing room below the header line and is never cropped.
+    // 2. Scale proportionally so the entire 720px source height fits within available vertical space.
+    // 3. Ensure generous bottomClearance so both feet and shoes remain 100% visible throughout all frames.
+    const topMargin = 40 * dpr;
+    const bottomClearance = 48 * dpr;
+    const availableH = Math.max(100, height - topMargin - bottomClearance);
+    const ratioH = availableH / 720.0;
     const ratioW = width / 1280.0;
     const ratio = Math.min(ratioW, ratioH);
 
     const nw = iw * ratio;
     const nh = ih * ratio;
     const cx = (width - nw) * 0.5;
-
-    // Shift frame upward to remove dead space at top of the footage,
-    // positioning the models immediately below the header line.
-    const topDeadSpaceOffset = 45.0 * ratio;
-    let cy = -topDeadSpaceOffset;
-
-    // Guard: guarantee shoes never get clipped at the bottom
-    const maxAllowedBottom = height - bottomClearance;
-    if (cy + nh > maxAllowedBottom) {
-      cy = maxAllowedBottom - nh;
-    }
+    // Vertically center within available height (topMargin to height - bottomClearance)
+    const cy = topMargin + (availableH - nh) * 0.5;
 
     return { nw, nh, cx, cy };
   }
