@@ -49,10 +49,14 @@ export default function Welcome() {
             <ArrowRight className="w-4 h-4 text-black group-hover:translate-x-1 transition-transform" />
           </button>
 
-          <a href="#ebooks" className="btn-main btn--line inline-flex items-center gap-3 text-xs tracking-[0.16em] uppercase py-4 px-8">
+          <button
+            type="button"
+            onClick={() => unlockNav('ebooks')}
+            className="btn-main btn--line inline-flex items-center gap-3 text-xs tracking-[0.16em] uppercase py-4 px-8 cursor-pointer hover:border-[#D1B992] transition-colors"
+          >
             <span>Découvrez nos e-books</span>
             <ArrowRight className="w-3.5 h-3.5" />
-          </a>
+          </button>
         </div>
       </div>
     </section>

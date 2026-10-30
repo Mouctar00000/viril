@@ -151,7 +151,7 @@ export default function Contact() {
                     placeholder="Votre nom"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full bg-[#04050A] border border-white/10 rounded-lg px-4 py-3.5 font-sans text-sm text-white placeholder-[#5E6479] outline-none focus:border-[#D1B992] transition-colors"
+                    className="w-full bg-[#04050A] border border-white/10 rounded-lg px-4 py-3.5 font-sans text-base sm:text-sm text-white placeholder-[#5E6479] outline-none focus:border-[#D1B992] transition-colors"
                   />
                 </div>
 
@@ -166,7 +166,7 @@ export default function Contact() {
                     placeholder="vous@exemple.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full bg-[#04050A] border border-white/10 rounded-lg px-4 py-3.5 font-sans text-sm text-white placeholder-[#5E6479] outline-none focus:border-[#D1B992] transition-colors"
+                    className="w-full bg-[#04050A] border border-white/10 rounded-lg px-4 py-3.5 font-sans text-base sm:text-sm text-white placeholder-[#5E6479] outline-none focus:border-[#D1B992] transition-colors"
                   />
                 </div>
               </div>
@@ -182,7 +182,7 @@ export default function Contact() {
                     placeholder="+237..."
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full bg-[#04050A] border border-white/10 rounded-lg px-4 py-3.5 font-sans text-sm text-white placeholder-[#5E6479] outline-none focus:border-[#D1B992] transition-colors"
+                    className="w-full bg-[#04050A] border border-white/10 rounded-lg px-4 py-3.5 font-sans text-base sm:text-sm text-white placeholder-[#5E6479] outline-none focus:border-[#D1B992] transition-colors"
                   />
                 </div>
 
@@ -195,7 +195,7 @@ export default function Contact() {
                     required
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    className="w-full bg-[#04050A] border border-white/10 rounded-lg px-4 py-3.5 font-sans text-sm text-white outline-none focus:border-[#D1B992] transition-colors"
+                    className="w-full bg-[#04050A] border border-white/10 rounded-lg px-4 py-3.5 font-sans text-base sm:text-sm text-white outline-none focus:border-[#D1B992] transition-colors"
                   >
                     <option value="" disabled>Sélectionnez un sujet</option>
                     <option value="info">Demande d'information</option>
@@ -220,7 +220,7 @@ export default function Contact() {
                   placeholder="Comment pouvons-nous vous aider ?"
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full bg-[#04050A] border border-white/10 rounded-lg px-4 py-3.5 font-sans text-sm text-white placeholder-[#5E6479] outline-none focus:border-[#D1B992] transition-colors resize-y"
+                  className="w-full bg-[#04050A] border border-white/10 rounded-lg px-4 py-3.5 font-sans text-base sm:text-sm text-white placeholder-[#5E6479] outline-none focus:border-[#D1B992] transition-colors resize-y"
                 />
               </div>
 

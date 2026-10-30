@@ -30,23 +30,42 @@ export function CartProvider({ children }) {
   const unlockNav = (targetId = 'boutique') => {
     setNavStage('unlocked');
 
-    setTimeout(() => {
-      if (targetId === 'boutique') {
+    const scrollToTarget = () => {
+      if (targetId === 'boutique' || targetId === 'top') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         try {
           window.history.pushState(null, '', '#boutique');
         } catch {
           window.location.hash = '#boutique';
         }
-      } else {
-        const targetEl = document.getElementById(targetId);
-        if (targetEl) {
-          targetEl.scrollIntoView({ behavior: 'smooth' });
-        } else {
+        return;
+      }
+
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        try {
+          window.history.pushState(null, '', '#' + targetId);
+        } catch {
           window.location.hash = '#' + targetId;
         }
+      } else {
+        // Fallback retry after layout settles
+        setTimeout(() => {
+          const retryEl = document.getElementById(targetId);
+          if (retryEl) {
+            retryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else {
+            window.location.hash = '#' + targetId;
+          }
+        }, 120);
       }
-    }, 50);
+    };
+
+    // Allow React transition to mount target section DOM
+    requestAnimationFrame(() => {
+      setTimeout(scrollToTarget, 60);
+    });
   };
 
   useEffect(() => {

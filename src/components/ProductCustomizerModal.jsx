@@ -159,6 +159,10 @@ export default function ProductCustomizerModal({ product, isOpen, onClose }) {
                     muted
                     loop
                     playsInline
+                    webkit-playsinline="true"
+                    controls={false}
+                    disablePictureInPicture
+                    disableRemotePlayback
                     className="relative z-10 w-full h-full object-cover rounded-xl filter drop-shadow-[0_20px_35px_rgba(0,0,0,0.85)] transition-transform duration-500 hover:scale-105"
                   />
                 ) : (
@@ -388,7 +392,7 @@ export default function ProductCustomizerModal({ product, isOpen, onClose }) {
                         value={engravingText}
                         onChange={(e) => setEngravingText(e.target.value)}
                         placeholder={product.engravingPlaceholder || 'Ex: V.A. ou vos initiales'}
-                        className="w-full px-4 py-2.5 rounded-lg bg-[#0A0C16] border border-white/15 text-white placeholder-[#5E6479] text-xs font-mono uppercase tracking-widest focus:border-[#D1B992] focus:outline-none transition-colors"
+                        className="w-full px-4 py-2.5 rounded-lg bg-[#0A0C16] border border-white/15 text-white placeholder-[#5E6479] text-base sm:text-xs font-mono uppercase tracking-widest focus:border-[#D1B992] focus:outline-none transition-colors"
                       />
                     </div>
 
@@ -400,7 +404,7 @@ export default function ProductCustomizerModal({ product, isOpen, onClose }) {
                         <select
                           value={engravingFont}
                           onChange={(e) => setEngravingFont(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg bg-[#0A0C16] border border-white/15 text-white text-xs focus:border-[#D1B992] focus:outline-none"
+                          className="w-full px-3 py-2 rounded-lg bg-[#0A0C16] border border-white/15 text-white text-base sm:text-xs focus:border-[#D1B992] focus:outline-none cursor-pointer"
                         >
                           <option value="serif">Serif Royal (Italique)</option>
                           <option value="sans">Sans-Serif Minimaliste</option>
@@ -415,7 +419,7 @@ export default function ProductCustomizerModal({ product, isOpen, onClose }) {
                         <select
                           value={engravingPosition}
                           onChange={(e) => setEngravingPosition(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg bg-[#0A0C16] border border-white/15 text-white text-xs focus:border-[#D1B992] focus:outline-none"
+                          className="w-full px-3 py-2 rounded-lg bg-[#0A0C16] border border-white/15 text-white text-base sm:text-xs focus:border-[#D1B992] focus:outline-none cursor-pointer"
                         >
                           <option value="fermoir">Sur le fermoir métallique</option>
                           <option value="interieur">À l'intérieur de la pièce</option>

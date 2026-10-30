@@ -416,11 +416,51 @@
   transition-delay: 0.36s;
 }
 
+/* Hide WebKit / iOS Safari video controls & play buttons */
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls {
+  display: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* iOS Safari font size zoom prevention for form controls (>= 16px prevents viewport zoom) */
+@media screen and (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Subtle WhatsApp Button Breathing Glow */
+@keyframes whatsappGlow {
+  0%, 100% {
+    box-shadow: 0 0 14px rgba(37, 211, 102, 0.28);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(37, 211, 102, 0.5);
+    transform: scale(1.015);
+  }
+}
+
+.btn-whatsapp-subtle {
+  animation: whatsappGlow 3.5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .reveal-on-scroll {
-    opacity: 1 !important;
+  .btn-whatsapp-subtle {
+    animation: none !important;
     transform: none !important;
-    transition: none !important;
   }
 }
 

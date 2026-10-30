@@ -127,16 +127,16 @@ export default function CheckoutModal({ isOpen, onClose, directItem = null }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in">
       <div 
-        className="relative w-full max-w-2xl bg-[#0A0C16] text-white border border-white/15 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] overflow-hidden max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-xl bg-[#0A0C16] text-white border border-white/15 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] overflow-hidden max-h-[92vh] flex flex-col"
         role="dialog"
         aria-modal="true"
       >
         {/* Modal Header */}
-        <div className="p-6 sm:p-7 border-b border-white/10 flex items-center justify-between bg-[#04050A]">
+        <div className="p-4 sm:p-6 border-b border-white/10 flex items-center justify-between bg-[#04050A]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/15 flex items-center justify-center p-2">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/5 border border-white/15 flex items-center justify-center p-1.5 sm:p-2">
               <img
                 src="/images/logo-white.png"
                 alt="VIRIL Logo"
@@ -144,10 +144,10 @@ export default function CheckoutModal({ isOpen, onClose, directItem = null }) {
               />
             </div>
             <div>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[#D1B992]">
+              <span className="font-mono text-[9.5px] uppercase tracking-widest text-[#D1B992]">
                 Passerelle de Commande Sécurisée
               </span>
-              <h3 className="font-sans font-medium text-lg sm:text-xl text-white">
+              <h3 className="font-sans font-medium text-base sm:text-xl text-white">
                 Finaliser votre acquisition
               </h3>
             </div>
@@ -155,7 +155,7 @@ export default function CheckoutModal({ isOpen, onClose, directItem = null }) {
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white/70 hover:text-[#D1B992] hover:border-[#D1B992] transition-all"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/10 flex items-center justify-center text-white/70 hover:text-[#D1B992] hover:border-[#D1B992] active:scale-95 transition-all cursor-pointer"
             aria-label="Fermer"
           >
             <X className="w-4 h-4" />
@@ -163,11 +163,11 @@ export default function CheckoutModal({ isOpen, onClose, directItem = null }) {
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
           {!orderComplete ? (
-            <form onSubmit={handleSubmitOrder} className="space-y-6">
+            <form onSubmit={handleSubmitOrder} className="space-y-5">
               {/* Order Recap Banner */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#04050A] border border-white/10 space-y-3">
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-[#04050A] border border-white/10 space-y-2.5">
                 <div className="flex items-center justify-between text-xs uppercase tracking-widest text-[#9AA0B4] border-b border-white/5 pb-2">
                   <span>Articles sélectionnés ({items.length})</span>
                   <span>Sous-total</span>
@@ -240,7 +240,7 @@ export default function CheckoutModal({ isOpen, onClose, directItem = null }) {
                 <label className="block text-xs uppercase tracking-wider text-[#9AA0B4]">
                   Vos coordonnées de livraison
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                   <div>
                     <input
                       type="text"
@@ -248,7 +248,7 @@ export default function CheckoutModal({ isOpen, onClose, directItem = null }) {
                       placeholder="Nom complet *"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#04050A] border border-white/10 text-white placeholder-[#5E6479] text-xs sm:text-sm focus:border-[#D1B992] focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-[#04050A] border border-white/10 text-white placeholder-[#5E6479] text-base sm:text-sm focus:border-[#D1B992] focus:outline-none transition-colors"
                     />
                   </div>
                   <div>
@@ -258,17 +258,17 @@ export default function CheckoutModal({ isOpen, onClose, directItem = null }) {
                       placeholder="Numéro WhatsApp (ex: 651024975) *"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#04050A] border border-white/10 text-white placeholder-[#5E6479] text-xs sm:text-sm focus:border-[#D1B992] focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-[#04050A] border border-white/10 text-white placeholder-[#5E6479] text-base sm:text-sm focus:border-[#D1B992] focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                   <div>
                     <select
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#04050A] border border-white/10 text-white text-xs sm:text-sm focus:border-[#D1B992] focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-[#04050A] border border-white/10 text-white text-base sm:text-sm focus:border-[#D1B992] focus:outline-none transition-colors cursor-pointer"
                     >
                       <option value="Yaoundé">Yaoundé (Livraison Express)</option>
                       <option value="Douala">Douala (Livraison 24h-48h)</option>
@@ -284,7 +284,7 @@ export default function CheckoutModal({ isOpen, onClose, directItem = null }) {
                       placeholder="Quartier ou repère de livraison"
                       value={formData.neighborhood}
                       onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#04050A] border border-white/10 text-white placeholder-[#5E6479] text-xs sm:text-sm focus:border-[#D1B992] focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-[#04050A] border border-white/10 text-white placeholder-[#5E6479] text-base sm:text-sm focus:border-[#D1B992] focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -295,7 +295,7 @@ export default function CheckoutModal({ isOpen, onClose, directItem = null }) {
                     placeholder="Instructions particulières (facultatif)..."
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#04050A] border border-white/10 text-white placeholder-[#5E6479] text-xs sm:text-sm focus:border-[#D1B992] focus:outline-none transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#04050A] border border-white/10 text-white placeholder-[#5E6479] text-base sm:text-sm focus:border-[#D1B992] focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -304,7 +304,7 @@ export default function CheckoutModal({ isOpen, onClose, directItem = null }) {
               <button
                 type="submit"
                 disabled={items.length === 0}
-                className="w-full py-4 rounded-full bg-[#D1B992] text-[#04050A] font-semibold text-xs uppercase tracking-widest hover:bg-[#DFCAA0] hover:shadow-[0_0_25px_rgba(209,185,146,0.5)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 px-6 rounded-full bg-[#D1B992] text-[#04050A] font-semibold text-xs uppercase tracking-widest hover:bg-[#DFCAA0] hover:shadow-[0_0_25px_rgba(209,185,146,0.5)] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <span>Confirmer ma commande ({formatMoney(calculatedTotal)})</span>
                 <ArrowRight className="w-4 h-4" />
@@ -346,11 +346,12 @@ export default function CheckoutModal({ isOpen, onClose, directItem = null }) {
 
               <div className="space-y-3 pt-2">
                 <button
+                  type="button"
                   onClick={handleConfirmOnWhatsApp}
-                  className="w-full max-w-md mx-auto py-3.5 rounded-full bg-[#25D366] text-black font-semibold text-xs uppercase tracking-wider hover:bg-white transition-all flex items-center justify-center gap-2 shadow-lg"
+                  className="w-full max-w-xs mx-auto py-3 px-6 rounded-full bg-[#25D366] text-black font-semibold text-xs uppercase tracking-wider hover:bg-white active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 btn-whatsapp-subtle cursor-pointer shadow-md"
                 >
-                  <PhoneCall className="w-4 h-4" />
-                  <span>Envoyer la confirmation sur WhatsApp (+237)</span>
+                  <PhoneCall className="w-4 h-4 text-black flex-shrink-0" />
+                  <span>Envoyer sur WhatsApp</span>
                 </button>
 
                 <button

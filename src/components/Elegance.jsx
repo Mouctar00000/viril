@@ -58,13 +58,17 @@ function AppleProductCard({
 
   return (
     <article
-      className={`catalog-product-card apple-product-card ${cardWidthClass} flex flex-col justify-between rounded-[2rem] border border-white/10 bg-[#0A0C16] hover:border-[#D1B992]/40 transition-all duration-500 hover:-translate-y-1.5 p-5 sm:p-6 shadow-[0_15px_40px_rgba(0,0,0,0.5)] hover:shadow-[0_25px_60px_rgba(209,185,146,0.15)] group relative overflow-hidden`}
+      className={`catalog-product-card apple-product-card ${cardWidthClass} flex flex-col justify-between rounded-[1.75rem] sm:rounded-[2rem] border border-white/10 bg-[#0A0C16] hover:border-[#D1B992]/40 transition-all duration-500 hover:-translate-y-1.5 ${
+        isGrid ? 'p-3 xs:p-3.5 sm:p-5' : 'p-5 sm:p-6'
+      } shadow-[0_15px_40px_rgba(0,0,0,0.5)] hover:shadow-[0_25px_60px_rgba(209,185,146,0.15)] group relative overflow-hidden`}
     >
       {/* Top Row: Badge & Wishlist Button */}
-      <div className="flex items-center justify-between mb-3 relative z-20">
-        <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[9.5px] uppercase font-mono tracking-widest text-[#D1B992] flex items-center gap-1.5 shadow-sm">
+      <div className="flex items-center justify-between mb-2.5 sm:mb-3 relative z-20">
+        <span className={`rounded-full bg-white/5 border border-white/10 uppercase font-mono tracking-widest text-[#D1B992] flex items-center gap-1 sm:gap-1.5 shadow-sm ${
+          isGrid ? 'px-2 py-0.5 text-[8.5px] sm:text-[9.5px]' : 'px-3 py-1 text-[9.5px]'
+        }`}>
           <span className="w-1.5 h-1.5 rounded-full bg-[#D1B992] shadow-[0_0_6px_#D1B992]" />
-          <span>{product.badge}</span>
+          <span className="truncate max-w-[90px] xs:max-w-none">{product.badge}</span>
         </span>
 
         <button
@@ -73,21 +77,25 @@ function AppleProductCard({
             e.stopPropagation();
             toggleFavorite(product.id);
           }}
-          className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+          className={`rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+            isGrid ? 'w-7 h-7 sm:w-9 sm:h-9' : 'w-9 h-9'
+          } ${
             isFav
               ? 'border-red-500/50 bg-red-500/20 text-red-500 scale-110 shadow-[0_0_12px_rgba(239,68,68,0.4)]'
               : 'border-white/10 bg-black/50 text-white/60 hover:text-white hover:border-white/30 hover:scale-105 active:scale-95'
           }`}
           aria-label={isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}
         >
-          <Heart className={`w-4 h-4 transition-transform ${isFav ? 'fill-current' : ''}`} />
+          <Heart className={`${isGrid ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4 h-4'} transition-transform ${isFav ? 'fill-current' : ''}`} />
         </button>
       </div>
 
       {/* Center Visual Stage with 3D Video or Image */}
       <div
         onClick={() => handleOpenConfigurator(product)}
-        className="relative w-full aspect-square rounded-2xl bg-[#04050A] border border-white/5 p-4 flex items-center justify-center overflow-hidden mb-4 cursor-pointer group-hover:border-[#D1B992]/30 transition-all duration-500 shadow-inner"
+        className={`relative w-full aspect-square rounded-xl sm:rounded-2xl bg-[#04050A] border border-white/5 ${
+          isGrid ? 'p-2 sm:p-4 mb-2 sm:mb-4' : 'p-4 mb-4'
+        } flex items-center justify-center overflow-hidden cursor-pointer group-hover:border-[#D1B992]/30 transition-all duration-500 shadow-inner`}
       >
         <div className="absolute inset-0 luxury-skeleton-shimmer z-0 pointer-events-none opacity-40" />
 
@@ -98,9 +106,9 @@ function AppleProductCard({
         />
 
         {product.video && (
-          <div className="absolute top-3 left-3 z-20 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md border border-[#D1B992]/50 text-[9px] uppercase font-mono tracking-wider text-[#D1B992] flex items-center gap-1.5 shadow-lg">
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/80 backdrop-blur-md border border-[#D1B992]/50 text-[8px] sm:text-[9px] uppercase font-mono tracking-wider text-[#D1B992] flex items-center gap-1 sm:gap-1.5 shadow-lg">
             <span className="w-1.5 h-1.5 rounded-full bg-[#D1B992] animate-pulse" />
-            <span>Animation 3D</span>
+            <span>3D</span>
           </div>
         )}
 
@@ -111,8 +119,12 @@ function AppleProductCard({
             muted
             loop
             playsInline
+            webkit-playsinline="true"
+            controls={false}
+            disablePictureInPicture
+            disableRemotePlayback
             preload="metadata"
-            className="relative z-10 w-full h-full object-cover rounded-xl filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.85)] group-hover:drop-shadow-[0_22px_35px_rgba(0,0,0,0.95)] group-hover:scale-[1.04] transition-all duration-700 ease-out pointer-events-none"
+            className="relative z-10 w-full h-full object-cover rounded-lg sm:rounded-xl filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.85)] group-hover:drop-shadow-[0_22px_35px_rgba(0,0,0,0.95)] group-hover:scale-[1.04] transition-all duration-700 ease-out pointer-events-none"
           />
         ) : (
           <img
@@ -124,7 +136,7 @@ function AppleProductCard({
         )}
 
         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
-          <span className="px-4 py-2 rounded-full bg-[#D1B992] text-[#04050A] font-semibold text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(209,185,146,0.4)] transform translate-y-2 group-hover:translate-y-0 transition-transform">
+          <span className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-[#D1B992] text-[#04050A] font-semibold text-[10px] sm:text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(209,185,146,0.4)] transform translate-y-2 group-hover:translate-y-0 transition-transform">
             Personnaliser
           </span>
         </div>
@@ -174,10 +186,10 @@ function AppleProductCard({
       {/* Product Information */}
       <div className="space-y-2 flex-1 flex flex-col justify-between">
         <div>
-          <div className="flex items-center gap-1.5 text-[11px] text-[#9AA0B4] mb-1">
+          <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] text-[#9AA0B4] mb-1">
             <div className="flex text-[#D4AF37]">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3 h-3 fill-current" />
+                <Star key={i} className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
               ))}
             </div>
             <span className="font-mono text-white font-medium">{product.rating.toFixed(1)}</span>
@@ -186,46 +198,55 @@ function AppleProductCard({
 
           <h4
             onClick={() => handleOpenConfigurator(product)}
-            className="font-sans font-medium text-lg sm:text-xl text-white group-hover:text-[#D1B992] transition-colors cursor-pointer leading-snug line-clamp-1"
+            className={`font-sans font-medium ${
+              isGrid ? 'text-xs xs:text-sm sm:text-lg' : 'text-lg sm:text-xl'
+            } text-white group-hover:text-[#D1B992] transition-colors cursor-pointer leading-snug line-clamp-1`}
           >
             {product.name}
           </h4>
 
-          <p className="font-sans text-xs text-[#9AA0B4] line-clamp-1">
+          <p className="font-sans text-[10.5px] sm:text-xs text-[#9AA0B4] line-clamp-1">
             {product.sub}
           </p>
         </div>
 
         {/* Pricing and Actions */}
-        <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+        <div className="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-between gap-1.5 sm:gap-2">
           <div>
-            <div className="font-sans font-bold text-lg text-white">
+            <div className={`font-sans font-bold ${
+              isGrid ? 'text-xs xs:text-sm sm:text-lg' : 'text-lg sm:text-xl'
+            } text-white`}>
               {formatMoney(product.price)}
             </div>
             {product.originalPrice && (
-              <span className="font-mono text-[11px] text-[#5E6479] line-through block -mt-0.5">
+              <span className="font-mono text-[9px] sm:text-[11px] text-[#5E6479] line-through block -mt-0.5">
                 {formatMoney(product.originalPrice)}
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 sm:gap-1.5">
             <button
               type="button"
               onClick={() => handleOpenConfigurator(product)}
-              className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full border border-white/15 bg-white/[0.04] text-[10.5px] uppercase tracking-wider text-white hover:text-[#D1B992] hover:border-[#D1B992] hover:bg-[#D1B992]/10 transition-all cursor-pointer font-medium active:scale-95"
+              className={`rounded-full border border-white/15 bg-white/[0.04] ${
+                isGrid ? 'px-2 py-1 sm:px-3.5 sm:py-2 text-[9px] sm:text-[10.5px]' : 'px-3 py-1.5 sm:px-3.5 sm:py-2 text-[10.5px]'
+              } uppercase tracking-wider text-white hover:text-[#D1B992] hover:border-[#D1B992] hover:bg-[#D1B992]/10 transition-all cursor-pointer font-medium active:scale-95`}
             >
-              Configurer
+              <span className="hidden xs:inline">Configurer</span>
+              <span className="xs:hidden">Voir</span>
             </button>
 
             <button
               type="button"
               onClick={handleFastAdd}
               title="Ajout rapide au panier"
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#D1B992]/10 border border-[#D1B992]/40 text-[#D1B992] hover:bg-[#D1B992] hover:text-[#04050A] hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer shadow-[0_0_12px_rgba(209,185,146,0.2)] hover:shadow-[0_0_20px_rgba(209,185,146,0.5)]"
+              className={`${
+                isGrid ? 'w-7 h-7 sm:w-9 sm:h-9' : 'w-8 h-8 sm:w-9 sm:h-9'
+              } rounded-full bg-[#D1B992]/10 border border-[#D1B992]/40 text-[#D1B992] hover:bg-[#D1B992] hover:text-[#04050A] hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer shadow-[0_0_12px_rgba(209,185,146,0.2)] hover:shadow-[0_0_20px_rgba(209,185,146,0.5)]`}
               aria-label="Ajouter au panier"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>
@@ -806,9 +827,13 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
                           <video
                             ref={videoRefs[idx]}
                             src={prod.video}
-                            autoPlay={idx === 0}
+                            autoPlay
                             muted
                             playsInline
+                            webkit-playsinline="true"
+                            controls={false}
+                            disablePictureInPicture
+                            disableRemotePlayback
                             preload={idx <= 1 ? 'auto' : 'metadata'}
                             aria-label={`Animation ${prod.name}`}
                             onEnded={() => transitionToShowcase((idx + 1) % showcaseProducts.length)}
@@ -1047,11 +1072,11 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
             </button>
 
             {/* View Mode Switcher: Apple Shelves vs Panoramic Grid */}
-            <div className="hidden sm:flex items-center p-1 rounded-2xl border border-white/10 bg-[#0A0C16]">
+            <div className="flex items-center p-1 rounded-2xl border border-white/10 bg-[#0A0C16] flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setBrowseMode('shelves')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-sans flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-sans flex items-center gap-1.5 transition-all cursor-pointer ${
                   browseMode === 'shelves'
                     ? 'bg-[#D1B992] text-[#04050A] font-semibold shadow-md'
                     : 'text-[#9AA0B4] hover:text-white'
@@ -1059,20 +1084,20 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
                 title="Parcours par rayons défilants (Style Apple)"
               >
                 <Layers className="w-3.5 h-3.5" />
-                <span>Rayons Apple</span>
+                <span className="hidden xs:inline">Rayons</span>
               </button>
               <button
                 type="button"
                 onClick={() => setBrowseMode('grid')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-sans flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-sans flex items-center gap-1.5 transition-all cursor-pointer ${
                   browseMode === 'grid'
                     ? 'bg-[#D1B992] text-[#04050A] font-semibold shadow-md'
                     : 'text-[#9AA0B4] hover:text-white'
                 }`}
-                title="Vue grille panoramique"
+                title="Vue grille 2x2"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
-                <span>Grille</span>
+                <span className="hidden xs:inline">Grille</span>
               </button>
             </div>
           </div>
@@ -1228,7 +1253,7 @@ export default function Elegance({ onOpenCustomizer, mode = 'all' }) {
 
             <div
               ref={gridRef}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+              className="grid grid-cols-2 lg:grid-cols-3 gap-3 xs:gap-4 sm:gap-6 md:gap-8"
             >
               {displayedProducts.map((product) => (
                 <AppleProductCard

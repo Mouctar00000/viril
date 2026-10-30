@@ -6,7 +6,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('accueil');
-  const { totalCount, setIsCartOpen, bump, favorites, navStage } = useCart();
+  const { totalCount, setIsCartOpen, bump, favorites, navStage, unlockNav } = useCart();
 
   // Navigation links are only displayed after the user unlocks the boutique (navStage === 'unlocked').
   const fullNavLinks = [
@@ -80,7 +80,11 @@ export default function Header() {
                   <a
                     key={link.id}
                     href={link.href}
-                    className={`relative font-sans text-xs tracking-[0.18em] uppercase py-2 transition-all duration-300 font-medium ${
+                    onClick={(e) => {
+                      e.preventDefault();
+                      unlockNav(link.id);
+                    }}
+                    className={`relative font-sans text-xs tracking-[0.18em] uppercase py-2 transition-all duration-300 font-medium cursor-pointer ${
                       isActive
                         ? 'text-white font-semibold'
                         : 'text-[#9AA0B4] hover:text-white'
@@ -185,7 +189,11 @@ export default function Header() {
                   <a
                     key={link.id}
                     href={link.href}
-                    onClick={() => setMenuOpen(false)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setMenuOpen(false);
+                      unlockNav(link.id);
+                    }}
                     className={`font-serif text-3xl sm:text-4xl py-3 border-b border-white/5 transition-all flex items-center justify-between group ${
                       isActive ? 'text-[#D1B992]' : 'text-white hover:text-[#D1B992]'
                     }`}

@@ -8,10 +8,9 @@ export default function Footer() {
       <div className="max-w-[1440px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-[1.6fr_1fr_1fr] gap-12 md:gap-16 pb-16">
           
-          {/* Brand Info (Matching Screenshot 1) */}
-          {/* Brand Info */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3.5">
+          {/* Brand Info (Centered on Mobile as in Screenshot 2) */}
+          <div className="space-y-4 flex flex-col items-center md:items-start text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-3.5">
               <img
                 src="/images/logo-white.png"
                 alt="VIRIL ACCESSORIES Logo"
@@ -38,21 +37,40 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Navigation Column */}
-          <div className="space-y-4">
+          {/* Navigation Column (Centered on Mobile as in Screenshot 2) */}
+          <div className="space-y-4 flex flex-col items-center md:items-start text-center md:text-left">
             <h4 className="font-sans text-[11px] uppercase tracking-[0.25em] text-[#D1B992] font-medium">
               Navigation
             </h4>
-            <ul className="space-y-2.5 text-xs text-[#9AA0B4]">
+            <ul className="space-y-2.5 text-xs text-[#9AA0B4] flex flex-col items-center md:items-start">
               {navStage === 'initial' ? (
                 <>
                   <li>
                     <button
+                      type="button"
                       onClick={() => unlockNav('boutique')}
-                      className="hover:text-white transition-colors text-left font-semibold text-[#D1B992] cursor-pointer inline-flex items-center gap-1.5"
+                      className="hover:text-white transition-colors text-center md:text-left font-semibold text-[#D1B992] cursor-pointer inline-flex items-center justify-center md:justify-start gap-1.5"
                     >
                       <span>Découvrir la collection</span>
                       <span>→</span>
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => unlockNav('ebooks')}
+                      className="hover:text-white transition-colors cursor-pointer"
+                    >
+                      E-books
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => unlockNav('apropos')}
+                      className="hover:text-white transition-colors cursor-pointer"
+                    >
+                      À propos
                     </button>
                   </li>
                   <li>
@@ -117,12 +135,12 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Legal & Socials (Matching Screenshot 1) */}
-          <div className="space-y-4">
+          {/* Legal & Socials (Centered on Mobile as in Screenshot 2) */}
+          <div className="space-y-4 flex flex-col items-center md:items-start text-center md:text-left">
             <h4 className="font-sans text-[11px] uppercase tracking-[0.25em] text-[#D1B992] font-medium">
               Légal & Réseaux
             </h4>
-            <ul className="space-y-2.5 text-xs text-[#9AA0B4]">
+            <ul className="space-y-2.5 text-xs text-[#9AA0B4] flex flex-col items-center md:items-start">
               <li>
                 <a href="#contact" className="hover:text-white transition-colors">
                   Mentions légales
@@ -234,8 +252,8 @@ export default function Footer() {
           </a>
         </div>
 
-        {/* Bottom Line (Matching Screenshot 1) */}
-        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 font-sans text-[10.5px] uppercase tracking-[0.14em] text-[#5E6479]">
+        {/* Bottom Line (Centered on Mobile as in Screenshot 2) */}
+        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-3 text-center sm:text-left font-sans text-[10.5px] uppercase tracking-[0.14em] text-[#5E6479]">
           <span>© 2026 VIRILACCESSORIES. TOUS DROITS RÉSERVÉS.</span>
           <span className="text-[#9AA0B4]">PORTEZ LA VIRILITÉ AU QUOTIDIEN.</span>
         </div>
